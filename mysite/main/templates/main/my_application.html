@@ -1,0 +1,13 @@
+{% extends 'main/base.html' %}
+
+{% block content %}
+    <div>
+        <p> Application</p>
+        <div>
+            <h3>{{user.first_name}} -- {{user.last_name}}</h3>
+            <h3>{{application.name}} -- {{application.description}}</h3>
+            <a href = "{% url 'update_application' application.id %}">Edit</a>
+            <a href = "{% url 'delete_application' application.id %}">Delete</a>
+        </div>
+    </div>
+{% endblock %}

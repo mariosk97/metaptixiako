@@ -1,0 +1,19 @@
+{% extends 'main/base.html' %}
+
+{% block content %}
+    <div class="home-container">
+        <p> All applications template</p>
+        <div>
+            {% for application in applications %}
+                <div>
+                    <h3>{{application.id}} -- <a href="/applications/{{application.id}}">{{application.name}}</a></h3> 
+                    <a href = "{% url 'update_application' application.id %}">Edit</a>
+                    <a href = "{% url 'delete_application' application.id %}">Delete</a>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+
+
+{% endblock %}
