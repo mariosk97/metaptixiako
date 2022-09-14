@@ -1,10 +1,10 @@
 {% extends 'main/base.html' %}
 
 {% block content %}
+<div>
+    <p> Application</p>
     <div>
-        <p> Application</p>
-        <div>
-            <h3>{{application.id}} -- {{application.name}}</h3>
-        </div>
+        <h3>{{user.first_name}} -- {{user.last_name}}</h3>
     </div>
+</div>
 {% endblock %}

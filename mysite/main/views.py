@@ -5,7 +5,6 @@ from .models import Application, User
 from .forms import ApplicationForm, UserRegisterForm, UserApplicationForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import UserCreationForm
-#from django.contrib.auth.models import User
 
 # Create your views here.
 
@@ -63,34 +62,40 @@ def applications(request): #list of all applications
 
 def application(request, pk): #info about a specific application
     application = Application.objects.get(id=pk)
-    context = {'application': application}
+    user = User.objects.get(application=application)
+    context = {'application': application, 'user': user}
     return render(request, "main/application.html", context)
 
 @login_required(login_url='login') #maybe delete later. Needed because create application link was available before login
 def create_application(request):
-    form = ApplicationForm()
-    #form = UserApplicationForm()
-    if request.method == 'POST':
-        form = ApplicationForm(request.POST)
-        #form = UserApplicationForm(request.POST)
-        if form.is_valid(): #automatically set the person that created the application
-            obj = form.save(commit=False)
-            obj.user = request.user
-            obj.save()
+    #form = ApplicationForm()
+    if request.user.is_superuser:
+        return redirect('home')
+    form = UserApplicationForm()
+    if request.method == 'POST':  
+        form = UserApplicationForm(request.POST, instance = request.user)
+        if form.is_valid():
+            form.save()
+            #application = Application(user=request.user, name='Beatles Blog', description='Test')
+            application = Application(user=request.user)
+            application.save()
             request.user.has_applied = True
             request.user.save()
-            #Application.objects.filter(user=request.user).update(has_applied=True)
             return redirect('home')
     context = {'form': form}
     return render(request, "main/application_form.html", context)   
 
+@login_required(login_url='login')
 def update_application(request, pk): #change an application that has already been created
     application = Application.objects.get(id=pk)
-    form = ApplicationForm(instance = application)
+    user = User.objects.get(application=application)
+    form = UserApplicationForm(request.POST, instance = user)
     if request.method == 'POST':
-        form = ApplicationForm(request.POST, instance = application)
+        #form = ApplicationForm(request.POST, instance = application)
+        form = UserApplicationForm(request.POST, instance = user)
         if form.is_valid():
             form.save()
+            application.save() #used in order to change updated field in application model
             return redirect('home')
     context = {'form': form}
     return render(request, "main/application_form.html", context)
