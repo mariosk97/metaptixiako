@@ -1,8 +1,10 @@
 from django.contrib import admin
+from .models import Application, User
 
 # Register your models here.
 
-from .models import Application, User
 
 admin.site.register(User)
 admin.site.register(Application)
+
+

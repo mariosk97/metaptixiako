@@ -2,7 +2,7 @@ from django.forms import ModelForm
 from .models import Application, User
 from django.contrib.auth.forms import UserCreationForm
 
-class ApplicationForm (ModelForm):
+class ApplicationForm (ModelForm): #currently not used. Done with UserApplicationForm
     class Meta:
         model = Application
         #fields = '__all__'
