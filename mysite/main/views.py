@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .models import Application, User
-from .forms import ApplicationForm, UserRegisterForm, UserApplicationForm
+from .models import Application, User, Contact_information
+from .forms import ApplicationForm, UserRegisterForm, UserApplicationForm, ContactInformationForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import UserCreationForm
 
@@ -71,33 +71,48 @@ def create_application(request):
     #form = ApplicationForm()
     if request.user.is_superuser:
         return redirect('home')
-    form = UserApplicationForm()
-    if request.method == 'POST':  
-        form = UserApplicationForm(request.POST, instance = request.user)
-        if form.is_valid():
-            form.save()
+    user_form = UserApplicationForm()
+    contact_info_form = ContactInformationForm()
+    if request.method == 'POST': 
+        if 'user_info' in request.POST: 
+            user_form = UserApplicationForm(request.POST, instance = request.user)
+            if user_form.is_valid():
+                user_form.save()
             #application = Application(user=request.user, name='Beatles Blog', description='Test')
-            application = Application(user=request.user)
-            application.save()
-            request.user.has_applied = True
-            request.user.save()
-            return redirect('home')
-    context = {'form': form}
+                application = Application(user=request.user)
+                application.save()
+                request.user.has_applied = True
+                request.user.save()
+                #return redirect('home')
+        if 'contact_info' in request.POST:   
+            contact_info_form = ContactInformationForm(request.POST)
+            if contact_info_form.is_valid():
+                contact_info = contact_info_form.save(commit = False)
+                contact_info.user = request.user
+                contact_info.save()
+    context = {'user_form': user_form, 'contact_info_form': contact_info_form}
     return render(request, "main/application_form.html", context)   
 
 @login_required(login_url='login')
 def update_application(request, pk): #change an application that has already been created
     application = Application.objects.get(id=pk)
     user = User.objects.get(application=application)
-    form = UserApplicationForm(request.POST, instance = user)
+    user_form = UserApplicationForm(instance = user) #populate with existing data
+    contact_info_form = ContactInformationForm(instance = Contact_information.objects.get(user=user))
     if request.method == 'POST':
         #form = ApplicationForm(request.POST, instance = application)
-        form = UserApplicationForm(request.POST, instance = user)
-        if form.is_valid():
-            form.save()
-            application.save() #used in order to change updated field in application model
-            return redirect('home')
-    context = {'form': form}
+        if 'user_info' in request.POST:
+            user_form = UserApplicationForm(request.POST, instance = user)
+            if user_form.is_valid():
+                user_form.save()
+                application.save() #used in order to change updated field in application model
+                #return redirect('home')
+        if 'contact_info' in request.POST:   
+            contact_info_form = ContactInformationForm(request.POST, instance = user)
+            if contact_info_form.is_valid():
+                contact_info_form.save()  
+                application.save()  
+    context = {'user_form': user_form, 'contact_info_form': contact_info_form}
     return render(request, "main/application_form.html", context)
 
 @login_required(login_url='login') #maybe delete later
