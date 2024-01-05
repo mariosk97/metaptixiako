@@ -11,6 +11,7 @@ urlpatterns = [
     path("create-application/", views.create_application, name="create_application"),
     path("update-application/<str:pk>/", views.update_application, name="update_application"),  
     path("delete-application/<str:pk>/", views.delete_application, name="delete_application"),
-    path("my_application/", views.my_application, name="my_application"),   
+    path("my_application/", views.my_application, name="my_application"),  
+    path('htmx/undergraduate-study-form/', views.add_undergraduate_study_form, name='create-study-form'), #htmx 
 
 ]

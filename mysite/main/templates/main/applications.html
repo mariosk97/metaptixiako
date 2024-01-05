@@ -1,19 +1,33 @@
 {% extends 'main/base.html' %}
 
 {% block content %}
-<div class="home-container">
+<div class="home-container container">
     <p> All applications template</p>
+    
     <div>
-        {% for application in applications %}
         <div>
-            <h3>{{application.id}} -- <a href="/applications/{{application.id}}">{{application.user}}</a></h3> 
-            <a href = "{% url 'update_application' application.id %}">Edit</a>
-            <a href = "{% url 'delete_application' application.id %}">Delete</a>
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">User</th>
+                        <!-- <th scope="col">Last Name</th> -->
+                        <th scope="col">Actions</th>
+                    </tr>
+                </thead>
+                
+                <tbody>
+                    {% for application in applications %}
+                    <tr>
+                        <th scope="row">{{application.id}}</th>
+                        <td>{{application.user}}</td>
+                        <td><a href="/applications/{{application.id}}">View</a> <a href = "{% url 'delete_application' application.id %}">Delete</a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
-        {% endfor %}
     </div>
 </div>
     
-
-
 {% endblock %}

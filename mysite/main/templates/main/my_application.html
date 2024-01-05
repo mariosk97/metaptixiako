@@ -1,12 +1,45 @@
 {% extends 'main/base.html' %}
 
 {% block content %}
-<div>
+<div class="container">
     <p> Application</p>
-    <div>
-        <h3>{{user.first_name}} -- {{user.last_name}}</h3>
-        <a href = "{% url 'update_application' application.id %}">Edit</a>
-        <a href = "{% url 'delete_application' application.id %}">Delete</a>
-    </div>
+
+    <div>   
+        <dl class="row">
+            <dt class="col-sm-3">First Name</dt>
+            <dd class="col-sm-9">{{user.first_name}}</dd>
+          
+            <dt class="col-sm-3">Last Name</dt>
+            <dd class="col-sm-9">{{user.last_name}}</dd>
+
+            <dt class="col-sm-3">Marital Status</dt>
+            <dd class="col-sm-9">{{user.marital_status}}</dd>
+
+            <dt class="col-sm-3">Home Number</dt>
+            <dd class="col-sm-9">{{contact_information.home_number}}</dd>
+
+            <dt class="col-sm-3">Cell Number</dt>
+            <dd class="col-sm-9">{{contact_information.cell_number}}</dd>
+
+            {% for form in undergraduate_info %}
+            <dt class="col-sm-3">Undergraduate</dt>
+            <dd class="col-sm-9">{{form.univercity}}</dd>
+            {% endfor %}
+
+            {% for form in postgraduate_info %}
+            <dt class="col-sm-3">Postgraduate</dt>
+            <dd class="col-sm-9">{{form.univercity}}</dd>
+            {% endfor %}
+
+            {% for form in foreign_language_info %}
+            <dt class="col-sm-3">Foreign Language</dt>
+            <dd class="col-sm-9">{{form.language}}</dd>
+            {% endfor %}
+        </dl> 
+    </div>    
+    
+    <a href = "{% url 'update_application' application.id %}">Edit</a>
+    <a href = "{% url 'delete_application' application.id %}">Delete</a>
+    
 </div>
 {% endblock %}

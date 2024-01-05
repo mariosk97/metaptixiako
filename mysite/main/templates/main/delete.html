@@ -5,7 +5,7 @@
     {% csrf_token %}
     <p>Are you sure you want to delete your application {{obj.user}}?</p>
     <a href="{{request.META.HTTP_REFERER}}">Go Back</a> <!-- goes back to previous page -->
-    <input type="submit" value="Confirm"/>
+    <input type="submit" value="Confirm" class="btn btn-primary" />
 </form>
 
 {% endblock content %}

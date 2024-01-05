@@ -97,6 +97,7 @@ class Foreign_language(models.Model):
     degree = models.CharField(max_length=150, null=True)
     grade = models.FloatField(null=True, blank=True)
     acquisition_date = models.DateField(null=True)
+    is_deleted = models.BooleanField(default = False) #true when the user wants to remove the form
 
     def __str__(self):
         return str(self.user) #this is shown in admin  
@@ -108,6 +109,7 @@ class Work_experience(models.Model):
     end_date = models.DateField(null=True, blank = True)
     company = models.CharField(max_length=150, null=True)
     position = models.CharField(max_length=150, null=True)
+    is_deleted = models.BooleanField(default = False) #true when the user wants to remove the form
 
     def __str__(self):
         return str(self.user) #this is shown in admin    
@@ -119,6 +121,7 @@ class Reference_letter(models.Model):
     position = models.CharField(max_length=150, null=True)
     organization = models.CharField(max_length=150, null=True)
     email = models.EmailField(null=True)
+    is_deleted = models.BooleanField(default = False) #true when the user wants to remove the form
     
     def __str__(self):
         return str(self.user) #this is shown in admin     
@@ -129,6 +132,7 @@ class Scholarship(models.Model):
     description = models.CharField(max_length=150, null=True)  
     acquisition_date = models.DateField(null=True, blank = True)
     educational_institution = models.CharField(max_length=150, null=True) 
+    is_deleted = models.BooleanField(default = False) #true when the user wants to remove the form
     
     def __str__(self):
         return str(self.user) #this is shown in admin  
@@ -139,24 +143,24 @@ class Theses(models.Model): #Diploma, undergraduate and postgraduate theses
     title = models.CharField(max_length=150, null=True, blank = True)
     supervisor = models.CharField(max_length=150, null=True, blank = True)
     grade = models.FloatField(null=True, blank = True)
+    is_deleted = models.BooleanField(default = False) #true when the user wants to remove the form
      
     def __str__(self):
         return str(self.user) #this is shown in admin  
 
 
 class Studies(models.Model):
-    user = models.ForeignKey(User,on_delete=models.CASCADE, null=True)
-    univercity = models.CharField(max_length=150, null=True)
-    department = models.CharField(max_length=150, null=True)
+    user = models.ForeignKey(User,on_delete=models.CASCADE, null=True) 
+    univercity = models.CharField(max_length=150, null=True, blank = True) #required field. Code in clean function in StudyForm. Can't remove blank=true because of is_deleted
+    department = models.CharField(max_length=150, null=True, blank = True) #required field. Code in clean function in StudyForm. Can't remove blank=true because of is_deleted
     degree_title = models.CharField(max_length=150, null=True, blank = True)
     grade = models.FloatField(null=True, blank = True)
+    is_deleted = models.BooleanField(default = False) #true when the user wants to remove the form
 
     class Meta:
         abstract = True #Base class for other models
 
-    def __str__(self):
-        return str(self.user) #this is shown in admin    
-    
+      
 
 class Undergraduate(Studies):   
 

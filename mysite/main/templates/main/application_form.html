@@ -1,17 +1,206 @@
 {% extends 'main/base.html' %}
-
 {% block content %}
-<div>
-    <form method="POST" action="">
+{% load crispy_forms_tags %}
+<div class="container"> <!--class used for bootstrap-->
+    <form id="form-container" method="POST" action=""> 
+    <!-- <form hx-post="." hx-trigger="click from:#submit-all"> -->   <!-- htmx-->
         {% csrf_token %}
-        {{user_form.as_p}}
-        <input type="submit" value="Submit" />
-    </form>
-    <hr>
-    <form method="POST" action="">
-        {% csrf_token %}
-        {{contact_info_form.as_p}}
-        <input type="submit" value="Submit" />
-    </form>
+        {{user_form|crispy}}
+        {{contact_info_form|crispy}}
+        {{undergraduate_formset.management_form}}
+        {% for form in undergraduate_formset %}
+        {% if not form.is_deleted.value %}<!--  if user hasn't deleted the form. Page refreshes when there are validation errors and deleted (hidden) forms shouldn't be shown again -->
+        <div class="undergraduate-form entire-form"> <!-- entire-form class is used to delete(hide) form when user checks delete checkbox -->
+        {{form|crispy}}
+        </div>
+        {% endif %}
+        {% endfor %}
+        <button id="add_undergraduate_form" type="button" class="btn btn-secondary">Add Undergraduate</button>
+        <br>
+        <!--  <button type="button" hx-get="{% url 'create-study-form' %}" hx-target="#undergaduateforms" hx-swap="beforeend">
+            Add Undergraduate Study
+        </button>  --> <!-- htmx-->
+        <!--  <div id="undergaduateforms"></div>  --> <!-- htmx-->
+        <br>
+        {{postgraduate_formset.management_form}}
+        {% for form in postgraduate_formset %}
+        {% if not form.is_deleted.value %} <!-- if user hasn't deleted the form. Page refreshes when there are validation errors and deleted (hidden) forms shouldn't be shown again -->
+        <div class="postgraduate-form entire-form">
+        {{form|crispy}}
+        </div>
+        {% endif %}
+        {% endfor %}
+        <button id="add_postgraduate_form" type="button" class="btn btn-secondary">Add Postgraduate</button>
+        <br>
+        <br>
+        {{foreign_language_formset.management_form}}
+        {% for form in foreign_language_formset %}
+        {% if not form.is_deleted.value %} 
+        <div class="foreign_language-form entire-form">
+        {{form|crispy}}
+        </div>
+        {% endif %}
+        {% endfor %}
+        <button id="add_foreign_language_form" type="button" class="btn btn-secondary">Add Foreign Language</button>
+        <br>
+        <br>
+        <input type="submit" value="Submit" id="submit-all" class="btn btn-primary"/> <!-- id is for htmx-->
+    </form> 
+    
 </div>
+
+<script>
+    let container = document.querySelector("#form-container")
+    console.log(window.location.href)
+    
+    //variables for dynamically adding forms in undergraduate formset
+    let undergraduateForm = document.querySelectorAll(".undergraduate-form")
+    console.log(undergraduateForm)
+    let addUndergraduateButton = document.querySelector("#add_undergraduate_form")
+    //let totalUndergraduateForms = document.querySelector("#id_undergraduate_set-TOTAL_FORMS") //works()
+    //console.log(totalUndergraduateForms)
+    let undergraduateFormNum = undergraduateForm.length-1
+    console.log("undergraduateFormNum: " + undergraduateFormNum)
+    //emptyUndergraduateFormNum does not and should not change, because the form that is cloned needs to be an empty one that 
+    //hasnt been inserted to the db (otherwise error is raised). So the only form that can be cloned is the one that was last when the page was loaded.
+    let emptyUndergraduateFormNum = undergraduateFormNum 
+    console.log("emptyUndergraduateFormNum: " + emptyUndergraduateFormNum)
+    //let undergraduatePrefix = "undergraduate_set" //works()
+    //addUndergraduateButton.addEventListener('click', addForm) //this works
+    let undergraduatePrefix //different prefix in create and update template
+    let totalUndergraduateForms //different html id in create and update template
+
+    //variables for dynamically adding forms in postgraduate formset
+    let postgraduateForm = document.querySelectorAll(".postgraduate-form")
+    let addPostgraduateButton = document.querySelector("#add_postgraduate_form")
+    let postgraduateFormNum = postgraduateForm.length-1
+    let emptyPostgraduateFormNum = postgraduateFormNum 
+    console.log("emptyPostgraduateFormNum: " + emptyPostgraduateFormNum)
+    let postgraduatePrefix 
+    let totalPostgraduateForms
+
+    //variables for dynamically adding forms in foreign language formset
+    let foreignLanguageForm = document.querySelectorAll(".foreign_language-form")
+    let addForeignLanguageButton = document.querySelector("#add_foreign_language_form")
+    let foreignLanguageFormNum = foreignLanguageForm.length-1
+    let emptyForeignLanguageFormNum = foreignLanguageFormNum
+    let foreignLanguagePrefix
+    let totalForeignLanguageForms
+
+    if (window.location.href.indexOf("create") > -1) { //if url contains 'create', user is trying to create an application
+        console.log("create")
+        undergraduatePrefix = "undergraduate"
+        totalUndergraduateForms = document.querySelector("#id_undergraduate-TOTAL_FORMS")
+        //first form is hidden so there is always an empty form to be copied by addFormT if page is refreshed because of validation errors plus user has deleted all forms
+        undergraduateForm[0].style.display = 'none' 
+        
+        postgraduatePrefix = "postgraduate"
+        //console.log(postgraduatePrefix)
+        totalPostgraduateForms = document.querySelector("#id_postgraduate-TOTAL_FORMS")
+        //first form is hidden so there is always an empty form to be copied by addFormT if page is refreshed because of validation errors plus user has deleted all forms
+        postgraduateForm[0].style.display = 'none' 
+
+        foreignLanguagePrefix = "foreign_language"
+        totalForeignLanguageForms = document.querySelector("#id_foreign_language-TOTAL_FORMS")
+        foreignLanguageForm[0].style.display = 'none' 
+        
+    }
+    else if (window.location.href.indexOf("update") > -1){ //if url contains 'update', user is trying to update an application
+        console.log("update")
+        undergraduatePrefix = "undergraduate_set"
+        totalUndergraduateForms = document.querySelector("#id_undergraduate_set-TOTAL_FORMS")
+
+        postgraduatePrefix = "postgraduate_set"
+        totalPostgraduateForms = document.querySelector("#id_postgraduate_set-TOTAL_FORMS")
+
+        foreignLanguagePrefix = "foreign_language_set"
+        totalForeignLanguageForms = document.querySelector("#id_foreign_language_set-TOTAL_FORMS")
+
+        //undergraduateForm[emptyUndergraduateFormNum].style.display = 'none' 
+        //postgraduateForm[emptyPostgraduateFormNum].style.display = 'none'
+    }
+    
+    addPostgraduateButton.addEventListener('click', (e) => {    
+        postgraduateFormNum = incrementFormNum(postgraduateFormNum);
+        console.log("postgraduateFormNum: " + postgraduateFormNum);
+        addFormT(e, postgraduateForm, postgraduatePrefix, postgraduateFormNum, addPostgraduateButton, emptyPostgraduateFormNum, totalPostgraduateForms); 
+    });
+
+    addUndergraduateButton.addEventListener('click', (e) => {    
+        undergraduateFormNum = incrementFormNum(undergraduateFormNum);
+        console.log("undergraduateFormNum: " + undergraduateFormNum);
+        addFormT(e, undergraduateForm, undergraduatePrefix, undergraduateFormNum, addUndergraduateButton, emptyUndergraduateFormNum, totalUndergraduateForms); 
+    });
+
+
+
+
+    addForeignLanguageButton.addEventListener('click', (e) => {    
+        foreignLanguageFormNum = incrementFormNum(foreignLanguageFormNum);
+        console.log("foreignLanguageFormNum: " + foreignLanguageFormNum);
+        addFormT(e, foreignLanguageForm, foreignLanguagePrefix, foreignLanguageFormNum, addForeignLanguageButton, emptyForeignLanguageFormNum, totalForeignLanguageForms); 
+    });
+
+    //palio function
+    function addForm(e){
+        e.preventDefault()
+
+        let newForm = undergraduateForm[0].cloneNode(true)
+        let formRegex = RegExp(`undergraduate-(\\d){1}-`,'g')
+
+        undergraduateFormNum++
+        newForm.innerHTML = newForm.innerHTML.replace(formRegex, `undergraduate-${undergraduateFormNum}-`)
+        container.insertBefore(newForm, addUndergraduateButton)
+            
+        totalUndergraduateForms.setAttribute('value', `${undergraduateFormNum+1}`)
+    }
+
+    //new test code below, works!!
+    const incrementFormNum = (num) => ++num;
+
+    //allakse onoma
+    function addFormT(e, formType, prefix, formNum, buttonType, emptyFormNum, totalForms){
+        e.preventDefault()
+
+        let newForm = formType[emptyFormNum].cloneNode(true)
+        let formRegex = RegExp(`${prefix}-(\\d){1}-`,'g')
+        console.log(formRegex)
+
+        //undergraduateFormNum++ //this works
+        newForm.innerHTML = newForm.innerHTML.replace(formRegex, `${prefix}-${formNum}-`)
+        newForm.style.display = 'block' //copied form is hidden
+        console.log(newForm)
+        container.insertBefore(newForm, buttonType)
+            
+        totalForms.setAttribute('value', `${formNum+1}`)
+    }
+    
+      
+    test = document.getElementById("id_undergraduate-0-univercity")
+
+    //TODO
+    container.addEventListener('change', e => {
+        hideForm(e)
+    });
+
+    function hideForm(e){
+        if(e.target.checked && e.target.classList.contains("deleteCheckbox")){
+            console.log("delete")
+            //form = e.target.closest("div")
+            form = e.target.closest(".entire-form")
+            form.style.display = 'none'
+        }
+    }
+
+    
+
+    //deleteCheckbox = document.getElementsByClassName("deleteCheckbox")
+    //console.log(test)
+    //console.log(test.closest("div")) //works
+    //console.log(test.parentNode.parentNode) //works
+    
+
+</script>
+
 {% endblock %}
+
