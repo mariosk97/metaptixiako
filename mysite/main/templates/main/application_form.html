@@ -3,48 +3,145 @@
 {% load crispy_forms_tags %}
 <div class="container"> <!--class used for bootstrap-->
     <form id="form-container" method="POST" action=""> 
-    <!-- <form hx-post="." hx-trigger="click from:#submit-all"> -->   <!-- htmx-->
         {% csrf_token %}
         {{user_form|crispy}}
         {{contact_info_form|crispy}}
         {{undergraduate_formset.management_form}}
         {% for form in undergraduate_formset %}
-        {% if not form.is_deleted.value %}<!--  if user hasn't deleted the form. Page refreshes when there are validation errors and deleted (hidden) forms shouldn't be shown again -->
-        <div class="undergraduate-form entire-form"> <!-- entire-form class is used to delete(hide) form when user checks delete checkbox -->
-        {{form|crispy}}
+        
+        
+        {% if form.is_deleted.value %}
+        <div class="undergraduate-form entire-form" style="display: none;"> <!-- used in case user has deleted the form and page refreshes because of validations errors -->
+            {{form|crispy}}
+        </div>
+        {% else %}
+        <div class="undergraduate-form entire-form">
+            {{form|crispy}}
         </div>
         {% endif %}
         {% endfor %}
+
+        <!--
+        mpainei edo
+        -->
+        
         <button id="add_undergraduate_form" type="button" class="btn btn-secondary">Add Undergraduate</button>
         <br>
-        <!--  <button type="button" hx-get="{% url 'create-study-form' %}" hx-target="#undergaduateforms" hx-swap="beforeend">
-            Add Undergraduate Study
-        </button>  --> <!-- htmx-->
-        <!--  <div id="undergaduateforms"></div>  --> <!-- htmx-->
         <br>
+
         {{postgraduate_formset.management_form}}
         {% for form in postgraduate_formset %}
-        {% if not form.is_deleted.value %} <!-- if user hasn't deleted the form. Page refreshes when there are validation errors and deleted (hidden) forms shouldn't be shown again -->
+        
+
+        {% if form.is_deleted.value %}
+        <div class="postgraduate-form entire-form" style="display: none;"> <!-- used in case user has deleted the form and page refreshes because of validations errors -->
+            {{form|crispy}}
+        </div>
+        {% else %}
         <div class="postgraduate-form entire-form">
-        {{form|crispy}}
+            {{form|crispy}}
         </div>
         {% endif %}
         {% endfor %}
+
+
         <button id="add_postgraduate_form" type="button" class="btn btn-secondary">Add Postgraduate</button>
         <br>
         <br>
         {{foreign_language_formset.management_form}}
         {% for form in foreign_language_formset %}
-        {% if not form.is_deleted.value %} 
+        
+
+        {% if form.is_deleted.value %}
+        <div class="foreign_language-form entire-form" style="display: none;"> <!-- used in case user has deleted the form and page refreshes because of validations errors -->
+            {{form|crispy}}
+        </div>
+        {% else %}
         <div class="foreign_language-form entire-form">
-        {{form|crispy}}
+            {{form|crispy}}
         </div>
         {% endif %}
         {% endfor %}
+
+
         <button id="add_foreign_language_form" type="button" class="btn btn-secondary">Add Foreign Language</button>
         <br>
         <br>
-        <input type="submit" value="Submit" id="submit-all" class="btn btn-primary"/> <!-- id is for htmx-->
+
+        {{work_experience_formset.management_form}}
+        {% for form in work_experience_formset %}
+        {% if form.is_deleted.value %}
+        <div class="work_experience-form entire-form" style="display: none;"> <!-- used in case user has deleted the form and page refreshes because of validations errors -->
+            {{form|crispy}}
+        </div>
+        {% else %}
+        <div class="work_experience-form entire-form">
+            {{form|crispy}}
+        </div>
+        {% endif %}
+        {% endfor %}
+
+
+        <button id="add_work_experience_form" type="button" class="btn btn-secondary">Add Work Experience</button>
+        <br>
+        <br>
+
+        {{reference_letter_formset.management_form}}
+        {% for form in reference_letter_formset %}
+        {% if form.is_deleted.value %}
+        <div class="reference_letter-form entire-form" style="display: none;"> <!-- used in case user has deleted the form and page refreshes because of validations errors -->
+            {{form|crispy}}
+        </div>
+        {% else %}
+        <div class="reference_letter-form entire-form">
+            {{form|crispy}}
+        </div>
+        {% endif %}
+        {% endfor %}
+
+
+        <button id="add_reference_letter_form" type="button" class="btn btn-secondary">Add Reference Letter</button>
+        <br>
+        <br>
+
+        {{scholarship_formset.management_form}}
+        {% for form in scholarship_formset %}
+        {% if form.is_deleted.value %}
+        <div class="scholarship-form entire-form" style="display: none;"> <!-- used in case user has deleted the form and page refreshes because of validations errors -->
+            {{form|crispy}}
+        </div>
+        {% else %}
+        <div class="scholarship-form entire-form">
+            {{form|crispy}}
+        </div>
+        {% endif %}
+        {% endfor %}
+
+
+        <button id="add_scholarship_form" type="button" class="btn btn-secondary">Add Scholarship</button>
+        <br>
+        <br>
+
+        {{theses_formset.management_form}}
+        {% for form in theses_formset %}
+        {% if form.is_deleted.value %}
+        <div class="theses-form entire-form" style="display: none;"> <!-- used in case user has deleted the form and page refreshes because of validations errors -->
+            {{form|crispy}}
+        </div>
+        {% else %}
+        <div class="theses-form entire-form">
+            {{form|crispy}}
+        </div>
+        {% endif %}
+        {% endfor %}
+
+
+        <button id="add_theses_form" type="button" class="btn btn-secondary">Add Theses</button>
+        <br>
+        <br>
+
+
+        <input type="submit" value="Submit" class="btn btn-primary"/> 
     </form> 
     
 </div>
@@ -87,22 +184,70 @@
     let foreignLanguagePrefix
     let totalForeignLanguageForms
 
+    //variables for dynamically adding forms in work experience formset
+    let workExperienceForm = document.querySelectorAll(".work_experience-form")
+    let addWorkExperienceButton = document.querySelector("#add_work_experience_form")
+    let workExperienceFormNum = workExperienceForm.length-1
+    let emptyWorkExperienceFormNum = workExperienceFormNum
+    let workExperiencePrefix
+    let totalWorkExperienceForms
+
+    //variables for dynamically adding forms in reference letter formset
+    let referenceLetterForm = document.querySelectorAll(".reference_letter-form")
+    let addReferenceLetterButton = document.querySelector("#add_reference_letter_form")
+    let referenceLetterFormNum = referenceLetterForm.length-1
+    let emptyReferenceLetterFormNum = referenceLetterFormNum
+    let referenceLetterPrefix
+    let totalReferenceLetterForms
+
+    //variables for dynamically adding forms in scholarship formset
+    let scholarshipForm = document.querySelectorAll(".scholarship-form")
+    let addScholarshipButton = document.querySelector("#add_scholarship_form")
+    let scholarshipFormNum = scholarshipForm.length-1
+    let emptyScholarshipFormNum = scholarshipFormNum
+    let scholarshipPrefix
+    let totalScholarshipForms
+
+    //variables for dynamically adding forms in theses formset
+    let thesesForm = document.querySelectorAll(".theses-form")
+    let addThesesButton = document.querySelector("#add_theses_form")
+    let thesesFormNum = thesesForm.length-1
+    let emptyThesesFormNum = thesesFormNum
+    let thesesPrefix
+    let totalThesesForms
+
     if (window.location.href.indexOf("create") > -1) { //if url contains 'create', user is trying to create an application
         console.log("create")
         undergraduatePrefix = "undergraduate"
         totalUndergraduateForms = document.querySelector("#id_undergraduate-TOTAL_FORMS")
-        //first form is hidden so there is always an empty form to be copied by addFormT if page is refreshed because of validation errors plus user has deleted all forms
+        //first form is hidden so there is always an empty form to be copied by addForm if page is refreshed because of validation errors plus user has deleted all forms
         undergraduateForm[0].style.display = 'none' 
         
         postgraduatePrefix = "postgraduate"
         //console.log(postgraduatePrefix)
         totalPostgraduateForms = document.querySelector("#id_postgraduate-TOTAL_FORMS")
-        //first form is hidden so there is always an empty form to be copied by addFormT if page is refreshed because of validation errors plus user has deleted all forms
+        //first form is hidden so there is always an empty form to be copied by addForm if page is refreshed because of validation errors plus user has deleted all forms
         postgraduateForm[0].style.display = 'none' 
 
         foreignLanguagePrefix = "foreign_language"
         totalForeignLanguageForms = document.querySelector("#id_foreign_language-TOTAL_FORMS")
         foreignLanguageForm[0].style.display = 'none' 
+
+        workExperiencePrefix = "work_experience"
+        totalWorkExperienceForms = document.querySelector("#id_work_experience-TOTAL_FORMS")
+        workExperienceForm[0].style.display = 'none' 
+
+        referenceLetterPrefix = "reference_letter"
+        totalReferenceLetterForms = document.querySelector("#id_reference_letter-TOTAL_FORMS")
+        referenceLetterForm[0].style.display = 'none' 
+
+        scholarshipPrefix = "scholarship"
+        totalScholarshipForms = document.querySelector("#id_scholarship-TOTAL_FORMS")
+        scholarshipForm[0].style.display = 'none'
+
+        thesesPrefix = "theses"
+        totalThesesForms = document.querySelector("#id_theses-TOTAL_FORMS")
+        thesesForm[0].style.display = 'none'
         
     }
     else if (window.location.href.indexOf("update") > -1){ //if url contains 'update', user is trying to update an application
@@ -116,33 +261,72 @@
         foreignLanguagePrefix = "foreign_language_set"
         totalForeignLanguageForms = document.querySelector("#id_foreign_language_set-TOTAL_FORMS")
 
-        //undergraduateForm[emptyUndergraduateFormNum].style.display = 'none' 
-        //postgraduateForm[emptyPostgraduateFormNum].style.display = 'none'
+        workExperiencePrefix = "work_experience_set"
+        totalWorkExperienceForms = document.querySelector("#id_work_experience_set-TOTAL_FORMS")
+
+        referenceLetterPrefix = "reference_letter_set"
+        totalReferenceLetterForms = document.querySelector("#id_reference_letter_set-TOTAL_FORMS")
+
+        scholarshipPrefix = "scholarship_set"
+        totalScholarshipForms = document.querySelector("#id_scholarship_set-TOTAL_FORMS")
+
+        thesesPrefix = "theses_set"
+        totalThesesForms = document.querySelector("#id_theses_set-TOTAL_FORMS")
+
     }
     
     addPostgraduateButton.addEventListener('click', (e) => {    
         postgraduateFormNum = incrementFormNum(postgraduateFormNum);
         console.log("postgraduateFormNum: " + postgraduateFormNum);
-        addFormT(e, postgraduateForm, postgraduatePrefix, postgraduateFormNum, addPostgraduateButton, emptyPostgraduateFormNum, totalPostgraduateForms); 
+        addForm(e, postgraduateForm, postgraduatePrefix, postgraduateFormNum, addPostgraduateButton, emptyPostgraduateFormNum, totalPostgraduateForms); 
     });
+
 
     addUndergraduateButton.addEventListener('click', (e) => {    
         undergraduateFormNum = incrementFormNum(undergraduateFormNum);
         console.log("undergraduateFormNum: " + undergraduateFormNum);
-        addFormT(e, undergraduateForm, undergraduatePrefix, undergraduateFormNum, addUndergraduateButton, emptyUndergraduateFormNum, totalUndergraduateForms); 
+        addForm(e, undergraduateForm, undergraduatePrefix, undergraduateFormNum, addUndergraduateButton, emptyUndergraduateFormNum, totalUndergraduateForms); 
     });
-
-
 
 
     addForeignLanguageButton.addEventListener('click', (e) => {    
         foreignLanguageFormNum = incrementFormNum(foreignLanguageFormNum);
         console.log("foreignLanguageFormNum: " + foreignLanguageFormNum);
-        addFormT(e, foreignLanguageForm, foreignLanguagePrefix, foreignLanguageFormNum, addForeignLanguageButton, emptyForeignLanguageFormNum, totalForeignLanguageForms); 
+        addForm(e, foreignLanguageForm, foreignLanguagePrefix, foreignLanguageFormNum, addForeignLanguageButton, emptyForeignLanguageFormNum, totalForeignLanguageForms); 
     });
 
+
+    addWorkExperienceButton.addEventListener('click', (e) => {    
+        workExperienceFormNum = incrementFormNum(workExperienceFormNum);
+        console.log("workExperienceFormNum: " + workExperienceFormNum);
+        addForm(e, workExperienceForm, workExperiencePrefix, workExperienceFormNum, addWorkExperienceButton, emptyWorkExperienceFormNum, totalWorkExperienceForms); 
+    });
+
+    
+    addReferenceLetterButton.addEventListener('click', (e) => {    
+        referenceLetterFormNum = incrementFormNum(referenceLetterFormNum);
+        console.log("referenceLetterFormNum: " + referenceLetterFormNum);
+        addForm(e, referenceLetterForm, referenceLetterPrefix, referenceLetterFormNum, addReferenceLetterButton, emptyReferenceLetterFormNum, totalReferenceLetterForms); 
+    });
+
+
+    addScholarshipButton.addEventListener('click', (e) => {    
+        scholarshipFormNum = incrementFormNum(scholarshipFormNum);
+        console.log("scholarshipFormNum: " + scholarshipFormNum);
+        addForm(e, scholarshipForm, scholarshipPrefix, scholarshipFormNum, addScholarshipButton, emptyScholarshipFormNum, totalScholarshipForms); 
+    });
+
+    
+    addThesesButton.addEventListener('click', (e) => {    
+        thesesFormNum = incrementFormNum(thesesFormNum);
+        console.log("thesesFormNum: " + thesesFormNum);
+        addForm(e, thesesForm, thesesPrefix, thesesFormNum, addThesesButton, emptyThesesFormNum, totalThesesForms); 
+    });
+
+
+
     //palio function
-    function addForm(e){
+    function addFormTemp(e){
         e.preventDefault()
 
         let newForm = undergraduateForm[0].cloneNode(true)
@@ -158,8 +342,8 @@
     //new test code below, works!!
     const incrementFormNum = (num) => ++num;
 
-    //allakse onoma
-    function addFormT(e, formType, prefix, formNum, buttonType, emptyFormNum, totalForms){
+    
+    function addForm(e, formType, prefix, formNum, buttonType, emptyFormNum, totalForms){
         e.preventDefault()
 
         let newForm = formType[emptyFormNum].cloneNode(true)

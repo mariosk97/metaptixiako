@@ -35,6 +35,26 @@
             <dt class="col-sm-3">Foreign Language</dt>
             <dd class="col-sm-9">{{form.language}}</dd>
             {% endfor %}
+
+            {% for form in work_experience_info %}
+            <dt class="col-sm-3">Work experience</dt>
+            <dd class="col-sm-9">{{form.position}}</dd>
+            {% endfor %}
+
+            {% for form in reference_letter_info %}
+            <dt class="col-sm-3">Reference letter</dt>
+            <dd class="col-sm-9">{{form.full_name}}</dd>
+            {% endfor %}
+
+            {% for form in scholarship_info %}
+            <dt class="col-sm-3">Scholarship</dt>
+            <dd class="col-sm-9">{{form.educational_institution}}</dd>
+            {% endfor %}
+
+            {% for form in theses_info %}
+            <dt class="col-sm-3">Theses</dt>
+            <dd class="col-sm-9">{{form.title}}</dd>
+            {% endfor %}
         </dl> 
     </div>    
     

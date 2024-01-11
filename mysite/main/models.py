@@ -68,6 +68,7 @@ class Application(models.Model):
     user = models.OneToOneField(User,on_delete=models.CASCADE, null=True) #change null=True
     updated = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True) #time created should be when has_applied=True
+    #is_validated = models.BooleanField(default=False)
     
     class Meta:
         ordering = ['-updated', '-created']
@@ -92,11 +93,11 @@ class Contact_information(models.Model):
 
 class Foreign_language(models.Model):   
     user = models.ForeignKey(User,on_delete=models.CASCADE, null=True)   
-    language = models.CharField(max_length=150, null=True)
+    language = models.CharField(max_length=150, null=True, blank=True)
     level = models.CharField(max_length=150, null=True, blank=True)
-    degree = models.CharField(max_length=150, null=True)
+    degree = models.CharField(max_length=150, null=True, blank=True)
     grade = models.FloatField(null=True, blank=True)
-    acquisition_date = models.DateField(null=True)
+    acquisition_date = models.DateField(null=True, blank=True)
     is_deleted = models.BooleanField(default = False) #true when the user wants to remove the form
 
     def __str__(self):
@@ -105,10 +106,10 @@ class Foreign_language(models.Model):
 
 class Work_experience(models.Model):   
     user = models.ForeignKey(User,on_delete=models.CASCADE, null=True)   
-    start_date = models.DateField(null=True)
+    start_date = models.DateField(null=True, blank=True)
     end_date = models.DateField(null=True, blank = True)
-    company = models.CharField(max_length=150, null=True)
-    position = models.CharField(max_length=150, null=True)
+    company = models.CharField(max_length=150, null=True, blank=True)
+    position = models.CharField(max_length=150, null=True, blank=True)
     is_deleted = models.BooleanField(default = False) #true when the user wants to remove the form
 
     def __str__(self):
@@ -117,10 +118,10 @@ class Work_experience(models.Model):
 
 class Reference_letter(models.Model):   
     user = models.ForeignKey(User,on_delete=models.CASCADE, null=True) 
-    full_name = models.CharField(max_length=150, null=True)  
-    position = models.CharField(max_length=150, null=True)
-    organization = models.CharField(max_length=150, null=True)
-    email = models.EmailField(null=True)
+    full_name = models.CharField(max_length=150, null=True, blank=True)  
+    position = models.CharField(max_length=150, null=True, blank=True)
+    organization = models.CharField(max_length=150, null=True, blank=True)
+    email = models.EmailField(null=True, blank=True)
     is_deleted = models.BooleanField(default = False) #true when the user wants to remove the form
     
     def __str__(self):
@@ -129,9 +130,9 @@ class Reference_letter(models.Model):
 
 class Scholarship(models.Model):   
     user = models.ForeignKey(User,on_delete=models.CASCADE, null=True) 
-    description = models.CharField(max_length=150, null=True)  
+    description = models.CharField(max_length=150, null=True, blank=True)  
     acquisition_date = models.DateField(null=True, blank = True)
-    educational_institution = models.CharField(max_length=150, null=True) 
+    educational_institution = models.CharField(max_length=150, null=True, blank=True) 
     is_deleted = models.BooleanField(default = False) #true when the user wants to remove the form
     
     def __str__(self):
@@ -161,7 +162,6 @@ class Studies(models.Model):
         abstract = True #Base class for other models
 
       
-
 class Undergraduate(Studies):   
 
     def __str__(self):
