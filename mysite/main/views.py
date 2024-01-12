@@ -90,7 +90,7 @@ def application(request, pk): #info about a specific application
 
 @login_required(login_url='login') #maybe delete later. Needed because create application link was available before login
 def create_application(request):
-    if request.user.is_superuser:
+    if request.user.groups.filter(name='Grammateia').exists():
         return redirect('home')
     user_form = UserApplicationForm()
     contact_info_form = ContactInformationForm()
@@ -371,6 +371,8 @@ def delete_application(request, pk): #delete an application
 
 @login_required(login_url='login')
 def my_application(request): #shows current users application info
+    if request.user.groups.filter(name='Grammateia').exists():
+        return redirect('home')
     user=request.user
     contact_information = Contact_information.objects.get(user=user)
     undergraduate_info = Undergraduate.objects.filter(user=user)

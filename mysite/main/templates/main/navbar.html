@@ -2,15 +2,14 @@
     <a class="nav-item nav-link" href="{% url 'home' %}">
         Home
     </a>
-
-    {% if request.user.is_superuser %}
+    {% if perms.main.view_application %}
     <a class="nav-item nav-link" href="{% url 'all_applications' %}"> 
         Applications
     </a>
     {% endif %}
 
     {% if request.user.is_authenticated  %}  
-    {% if not request.user.is_superuser %}
+    {% if not perms.main.view_application %}
     {% if not request.user.has_applied %}
     <a class="nav-item nav-link" href="{% url 'create_application' %}">
         Create Application
