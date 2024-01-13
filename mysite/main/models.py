@@ -69,6 +69,7 @@ class Application(models.Model):
     updated = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True) #time created should be when has_applied=True
     is_validated = models.BooleanField(default=False)
+    is_accepted = models.BooleanField(default=False)
     
     class Meta:
         ordering = ['-updated', '-created']

@@ -21,7 +21,12 @@
                     <tr>
                         <th scope="row">{{application.id}}</th>
                         <td>{{application.user}}</td>
-                        <td><a href="/applications/{{application.id}}">View</a> <a href = "{% url 'delete_application' application.id %}">Delete</a></td>
+                        <td><a href="/applications/{{application.id}}">View</a> 
+                        {% if not application.is_validated %}
+                        <a href = "{% url 'validate_application' application.id %}">Validate</a></td>
+                        {% elif not application.is_accepted %}
+                        <a href = "{% url 'accept_application' application.id %}">Accept</a></td>
+                        {% endif %}
                     </tr>
                     {% endfor %}
                 </tbody>

@@ -396,6 +396,42 @@ def my_application(request): #shows current users application info
     return render(request, "main/my_application.html", context)
 
 
+@login_required(login_url='login') #maybe delete later
+def validate_application(request, pk):
+    if not request.user.has_perm("main.validate_application"):
+        return redirect('home')
+    
+    application = Application.objects.get(id=pk)
+    
+    if request.method == 'POST':
+        application.is_validated = True
+        application.save()
+        return redirect('all_applications')
+
+    context = {'application': application}    
+
+    return render(request, "main/validate.html", context)
+
+
+@login_required(login_url='login') #maybe delete later
+def accept_application(request, pk):
+    if not request.user.has_perm("main.validate_application"):
+        return redirect('home')
+    
+    application = Application.objects.get(id=pk)
+    
+    if request.method == 'POST':
+        application.is_accepted = True
+        application.save()
+        return redirect('all_applications')
+
+    context = {'application': application}    
+
+    return render(request, "main/accept.html", context)
+    
+
+
+
 
 
       
