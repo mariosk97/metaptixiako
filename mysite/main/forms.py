@@ -30,7 +30,7 @@ class UserApplicationForm(ModelForm):
 
     class Meta:
         model = User  
-        fields = ['first_name', 'last_name', 'fathers_name', 'mothers_name', 'sex', 'place_of_birth', 'prefecture', 'country', 'marital_status', 'military_service', 'date_of_birth', 'amka' , 'afm']       
+        fields = ['first_name', 'last_name','email', 'fathers_name', 'mothers_name', 'sex', 'place_of_birth', 'prefecture', 'country', 'marital_status', 'military_service', 'date_of_birth', 'amka' , 'afm']       
             
     
 

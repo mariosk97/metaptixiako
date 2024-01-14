@@ -58,12 +58,16 @@ def home(request):
 
 
 def applications(request): #list of all applications  
+    if not request.user.has_perm("main.view_application"):
+        return redirect('home')
     applications = Application.objects.all()
     context = {'applications': applications}
     return render(request, "main/applications.html", context)    
 
 
 def application(request, pk): #info about a specific application
+    if not request.user.has_perm("main.view_application"):
+        return redirect('home')
     application = Application.objects.get(id=pk)
     user = User.objects.get(application=application)
     contact_information = Contact_information.objects.get(user=user)
@@ -92,7 +96,7 @@ def application(request, pk): #info about a specific application
 def create_application(request):
     if request.user.groups.filter(name='Grammateia').exists():
         return redirect('home')
-    user_form = UserApplicationForm()
+    user_form = UserApplicationForm(instance = request.user) #some information was filled during registration so it should be populated with existing data 
     contact_info_form = ContactInformationForm()
     #prefix is used because more than one formsets will be displayed on the page
     undergraduate_formset = UndergraduateFormSet(queryset=Undergraduate.objects.none(), prefix = 'undergraduate')
@@ -415,7 +419,7 @@ def validate_application(request, pk):
 
 @login_required(login_url='login') #maybe delete later
 def accept_application(request, pk):
-    if not request.user.has_perm("main.validate_application"):
+    if not request.user.has_perm("main.accept_application"):
         return redirect('home')
     
     application = Application.objects.get(id=pk)

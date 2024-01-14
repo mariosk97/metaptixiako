@@ -74,7 +74,8 @@ class Application(models.Model):
     class Meta:
         ordering = ['-updated', '-created']
         permissions = [
-            ("validate_application", "Can validate an application")
+            ("validate_application", "Can validate an application"),
+            ("accept_application", "Can accept an application")
         ]
 
 
