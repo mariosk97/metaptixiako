@@ -48,7 +48,10 @@ class StudyForm(ModelForm):
         model = Studies
         exclude = ['user'] #automatically assigned from create application view
         labels = {
-            "is_deleted": "Delete"
+            "is_deleted": "Delete",
+            "univercity": "Univercity*",
+            "department": "Department*",
+            "degree_title": "Degree Title*"
         }
 
     def __init__(self, *args, **kwargs):
@@ -82,12 +85,16 @@ PostgraduateFormSet = inlineformset_factory(
 
 
 class ForeignLanguageForm(ModelForm): 
+    acquisition_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
     
     class Meta:
         model = Foreign_language
         exclude = ['user'] #automatically assigned from create application view
         labels = {
-            "is_deleted": "Delete"
+            "is_deleted": "Delete",
+            "language": "Language*",
+            "degree": "Degree*",
+            "acquisition_date": "Acquisition Date*"
         }
 
     def __init__(self, *args, **kwargs):
@@ -117,12 +124,17 @@ ForeignLanguageFormSet = inlineformset_factory(
 
 
 class WorkExperienceForm(ModelForm): 
+    start_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    end_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
     
     class Meta:
         model = Work_experience
         exclude = ['user'] #automatically assigned from create application view
         labels = {
-            "is_deleted": "Delete"
+            "is_deleted": "Delete",
+            "start_date": "Start Date*",
+            "company": "Company*",
+            "position": "Position*"
         }
 
     def __init__(self, *args, **kwargs):
@@ -156,7 +168,11 @@ class ReferenceLetterForm(ModelForm):
         model = Reference_letter
         exclude = ['user'] #automatically assigned from create application view
         labels = {
-            "is_deleted": "Delete"
+            "is_deleted": "Delete",
+            "full_name": "Full Name*",
+            "position": "Position*",
+            "organization": "Organization*",
+            "email": "Email*"
         }
 
     def __init__(self, *args, **kwargs):
@@ -185,12 +201,15 @@ ReferenceLetterFormSet = inlineformset_factory(
 
 
 class ScholarshipForm(ModelForm): 
+    acquisition_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
     
     class Meta:
         model = Scholarship
         exclude = ['user'] #automatically assigned from create application view
         labels = {
-            "is_deleted": "Delete"
+            "is_deleted": "Delete",
+            "description": "Description*",
+            "educational_institution": "Educational Institution*"
         }
 
     def __init__(self, *args, **kwargs):
@@ -223,7 +242,8 @@ class ThesesForm(ModelForm):
         model = Theses
         exclude = ['user'] #automatically assigned from create application view
         labels = {
-            "is_deleted": "Delete"
+            "is_deleted": "Delete",
+            "title": "Title*"
         }
 
     def __init__(self, *args, **kwargs):
