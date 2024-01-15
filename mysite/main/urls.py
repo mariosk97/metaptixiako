@@ -14,6 +14,7 @@ urlpatterns = [
     path("validate-application/<str:pk>/", views.validate_application, name="validate_application"),
     path("accept-application/<str:pk>/", views.accept_application, name="accept_application"),
     path("my_application/", views.my_application, name="my_application"),  
+    path("user-information/", views.user_information, name="user_information"),
     
 
 ]

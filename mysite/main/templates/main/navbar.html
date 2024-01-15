@@ -11,7 +11,7 @@
     {% if request.user.is_authenticated  %}  
     {% if not perms.main.view_application %}
     {% if not request.user.has_applied %}
-    <a class="nav-item nav-link" href="{% url 'create_application' %}">
+    <a class="nav-item nav-link" href="{% url 'user_information' %}">
         Create Application
     </a>
     {% else %}

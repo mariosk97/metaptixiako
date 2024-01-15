@@ -434,8 +434,33 @@ def accept_application(request, pk):
     return render(request, "main/accept.html", context)
     
 
+####POLLA SUBMIT
+
+@login_required(login_url='login') #maybe delete later
+def user_information(request):
+    if request.user.groups.filter(name='Grammateia').exists():
+        return redirect('home')
+    
+    user_form = UserApplicationForm(instance = request.user) #some information was filled during registration so it should be populated with existing data
+
+    if request.method == 'POST': 
+        user_form = UserApplicationForm(request.POST, instance = request.user)
+        if user_form.is_valid():
+            user_form.save()
+
+            #application = Application(user=request.user)
+            #application.save()
+            #request.user.has_applied = True
+            #request.user.save()              
+                
+            return redirect('contact_information')
 
 
+    context = {
+        'user_form': user_form
+    }
+
+    return render(request, "main/user_information.html", context) 
 
 
       
