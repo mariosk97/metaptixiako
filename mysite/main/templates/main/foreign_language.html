@@ -1,0 +1,78 @@
+{% extends 'main/base.html' %}
+{% block content %}
+{% load crispy_forms_tags %}
+<div class="container"> <!--class used for bootstrap-->
+    <form id="form-container" method="POST" action=""> 
+        {% csrf_token %}
+        {{foreign_language_formset.management_form}}
+        {% for form in foreign_language_formset %}
+        {% if form.is_deleted.value %}
+        <div class="foreign_language-form entire-form" style="display: none;"> <!-- used in case user has deleted the form and page refreshes because of validations errors -->
+            {{form|crispy}}
+        </div>
+        {% else %}
+        <div class="foreign_language-form entire-form">
+            {{form|crispy}}
+        </div>
+        {% endif %}
+        {% endfor %}
+
+        
+        <button id="add_foreign_language_form" type="button" class="btn btn-secondary">Add Foreign Language</button>
+
+        <input type="submit" value="Next" class="btn btn-primary"/>
+    </form>
+</div>        
+
+<script>
+    let container = document.querySelector("#form-container")
+    let foreignLanguageForm = document.querySelectorAll(".foreign_language-form")
+    let addForeignLanguageButton = document.querySelector("#add_foreign_language_form")
+    let foreignLanguageFormNum = foreignLanguageForm.length-1
+    let emptyForeignLanguageFormNum = foreignLanguageFormNum
+    let foreignLanguagePrefix = "foreign_language"
+    let totalForeignLanguageForms = document.querySelector("#id_foreign_language-TOTAL_FORMS")
+    //first form is hidden so there is always an empty form to be copied by addForm if page is refreshed because of validation errors plus user has deleted all forms
+    foreignLanguageForm[0].style.display = 'none' 
+
+    addForeignLanguageButton.addEventListener('click', (e) => {    
+        foreignLanguageFormNum = incrementFormNum(foreignLanguageFormNum);
+        console.log("foreignLanguageFormNum: " + foreignLanguageFormNum);
+        addForm(e, foreignLanguageForm, foreignLanguagePrefix, foreignLanguageFormNum, addForeignLanguageButton, emptyForeignLanguageFormNum, totalForeignLanguageForms); 
+    });
+
+    const incrementFormNum = (num) => ++num;
+
+    function addForm(e, formType, prefix, formNum, buttonType, emptyFormNum, totalForms){
+        e.preventDefault()
+
+        let newForm = formType[emptyFormNum].cloneNode(true)
+        let formRegex = RegExp(`${prefix}-(\\d){1}-`,'g')
+        console.log(formRegex)
+
+        //undergraduateFormNum++ //this works
+        newForm.innerHTML = newForm.innerHTML.replace(formRegex, `${prefix}-${formNum}-`)
+        newForm.style.display = 'block' //copied form is hidden
+        console.log(newForm)
+        container.insertBefore(newForm, buttonType)
+            
+        totalForms.setAttribute('value', `${formNum+1}`)
+    }
+
+    container.addEventListener('change', e => {
+        hideForm(e)
+    });
+
+    function hideForm(e){
+        if(e.target.checked && e.target.classList.contains("deleteCheckbox")){
+            console.log("delete")
+            //form = e.target.closest("div")
+            form = e.target.closest(".entire-form")
+            form.style.display = 'none'
+        }
+    }
+
+
+</script>    
+
+{% endblock %} 

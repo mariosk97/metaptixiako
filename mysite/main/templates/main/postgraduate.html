@@ -1,0 +1,79 @@
+{% extends 'main/base.html' %}
+{% block content %}
+{% load crispy_forms_tags %}
+<div class="container"> <!--class used for bootstrap-->
+    <form id="form-container" method="POST" action=""> 
+        {% csrf_token %}
+        {{postgraduate_formset.management_form}}
+        {% for form in postgraduate_formset %}
+        {% if form.is_deleted.value %}
+        <div class="postgraduate-form entire-form" style="display: none;"> <!-- used in case user has deleted the form and page refreshes because of validations errors -->
+            {{form|crispy}}
+        </div>
+        {% else %}
+        <div class="postgraduate-form entire-form">
+            {{form|crispy}}
+        </div>
+        {% endif %}
+        {% endfor %}
+
+        
+        <button id="add_postgraduate_form" type="button" class="btn btn-secondary">Add Postgraduate</button>
+
+        <input type="submit" value="Next" class="btn btn-primary"/>
+    </form>
+</div>        
+
+<script>
+    let container = document.querySelector("#form-container")
+    let postgraduateForm = document.querySelectorAll(".postgraduate-form")
+    let addPostgraduateButton = document.querySelector("#add_postgraduate_form")
+    let postgraduateFormNum = postgraduateForm.length-1
+    let emptyPostgraduateFormNum = postgraduateFormNum 
+    console.log("emptyPostgraduateFormNum: " + emptyPostgraduateFormNum)
+    let postgraduatePrefix = "postgraduate"
+    let totalPostgraduateForms = document.querySelector("#id_postgraduate-TOTAL_FORMS")
+    //first form is hidden so there is always an empty form to be copied by addForm if page is refreshed because of validation errors plus user has deleted all forms
+    postgraduateForm[0].style.display = 'none' 
+
+    addPostgraduateButton.addEventListener('click', (e) => {    
+        postgraduateFormNum = incrementFormNum(postgraduateFormNum);
+        console.log("postgraduateFormNum: " + postgraduateFormNum);
+        addForm(e, postgraduateForm, postgraduatePrefix, postgraduateFormNum, addPostgraduateButton, emptyPostgraduateFormNum, totalPostgraduateForms); 
+    });
+
+    const incrementFormNum = (num) => ++num;
+
+    function addForm(e, formType, prefix, formNum, buttonType, emptyFormNum, totalForms){
+        e.preventDefault()
+
+        let newForm = formType[emptyFormNum].cloneNode(true)
+        let formRegex = RegExp(`${prefix}-(\\d){1}-`,'g')
+        console.log(formRegex)
+
+        //undergraduateFormNum++ //this works
+        newForm.innerHTML = newForm.innerHTML.replace(formRegex, `${prefix}-${formNum}-`)
+        newForm.style.display = 'block' //copied form is hidden
+        console.log(newForm)
+        container.insertBefore(newForm, buttonType)
+            
+        totalForms.setAttribute('value', `${formNum+1}`)
+    }
+
+    container.addEventListener('change', e => {
+        hideForm(e)
+    });
+
+    function hideForm(e){
+        if(e.target.checked && e.target.classList.contains("deleteCheckbox")){
+            console.log("delete")
+            //form = e.target.closest("div")
+            form = e.target.closest(".entire-form")
+            form.style.display = 'none'
+        }
+    }
+
+
+</script>    
+
+{% endblock %} 

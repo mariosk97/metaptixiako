@@ -455,12 +455,233 @@ def user_information(request):
                 
             return redirect('contact_information')
 
-
     context = {
         'user_form': user_form
     }
 
     return render(request, "main/user_information.html", context) 
+
+
+login_required(login_url='login') #maybe delete later
+def contact_information(request):
+    if request.user.groups.filter(name='Grammateia').exists():
+        return redirect('home')
+    
+    contact_info_form = ContactInformationForm()
+
+    if request.method == 'POST':
+        contact_info_form = ContactInformationForm(request.POST)
+        if contact_info_form.is_valid():
+            contact_info = contact_info_form.save(commit = False)
+            contact_info.user = request.user
+            contact_info.save()
+
+            return redirect('undergraduate')
+
+    context = {
+        'contact_info_form': contact_info_form
+    }
+
+    return render(request, "main/contact_information.html", context) 
+
+
+login_required(login_url='login') #maybe delete later
+def undergraduate(request):
+    if request.user.groups.filter(name='Grammateia').exists():
+        return redirect('home')
+    
+    undergraduate_formset = UndergraduateFormSet(queryset=Undergraduate.objects.none(), prefix = 'undergraduate')
+
+    if request.method == 'POST':
+        undergraduate_formset = UndergraduateFormSet(request.POST, prefix = 'undergraduate')
+        if undergraduate_formset.is_valid():
+            for form in undergraduate_formset:
+                if form.has_changed():#ignore empty forms
+                    form_is_deleted = form.cleaned_data['is_deleted']
+                    if not form_is_deleted: #ignore deleted (hidden) forms
+                        undergraduate_info = form.save(commit = False)
+                        undergraduate_info.user = request.user
+                        undergraduate_info.save()
+
+            return redirect('postgraduate')
+
+    context = {
+        'undergraduate_formset': undergraduate_formset
+    }
+
+    return render(request, "main/undergraduate.html", context) 
+
+
+login_required(login_url='login') #maybe delete later
+def postgraduate(request):
+    if request.user.groups.filter(name='Grammateia').exists():
+        return redirect('home')
+    
+    postgraduate_formset = PostgraduateFormSet(queryset=Postgraduate.objects.none(), prefix = 'postgraduate')
+
+    if request.method == 'POST':
+        postgraduate_formset = PostgraduateFormSet(request.POST, prefix = 'postgraduate')
+        if postgraduate_formset.is_valid():
+            for form in postgraduate_formset:
+                if form.has_changed():#ignore empty forms
+                    form_is_deleted = form.cleaned_data['is_deleted']
+                    if not form_is_deleted: #ignore deleted (hidden) forms
+                        postgraduate_info = form.save(commit = False)
+                        postgraduate_info.user = request.user
+                        postgraduate_info.save()
+
+            return redirect('foreign_language')
+
+        else:
+            print("not valid")
+
+    context = {
+        'postgraduate_formset': postgraduate_formset
+    }
+
+    return render(request, "main/postgraduate.html", context) 
+
+
+login_required(login_url='login') #maybe delete later
+def foreign_language(request):
+    if request.user.groups.filter(name='Grammateia').exists():
+        return redirect('home')
+    
+    foreign_language_formset = ForeignLanguageFormSet(queryset=Foreign_language.objects.none(), prefix = 'foreign_language')
+
+    if request.method == 'POST':
+        foreign_language_formset = ForeignLanguageFormSet(request.POST, prefix = 'foreign_language')
+        if foreign_language_formset.is_valid():
+            for form in foreign_language_formset:
+                if form.has_changed():#ignore empty forms
+                    form_is_deleted = form.cleaned_data['is_deleted']
+                    if not form_is_deleted: #ignore deleted (hidden) forms
+                        foreign_language_info = form.save(commit = False)
+                        foreign_language_info.user = request.user
+                        foreign_language_info.save()
+
+            return redirect('work_experience')
+
+    context = {
+        'foreign_language_formset': foreign_language_formset
+    }
+
+    return render(request, "main/foreign_language.html", context) 
+
+
+login_required(login_url='login') #maybe delete later
+def work_experience(request):
+    if request.user.groups.filter(name='Grammateia').exists():
+        return redirect('home')
+    
+    work_experience_formset = WorkExperienceFormSet(queryset=Work_experience.objects.none(), prefix = 'work_experience')
+
+    if request.method == 'POST':
+        work_experience_formset = WorkExperienceFormSet(request.POST, prefix = 'work_experience')
+        if work_experience_formset.is_valid():
+            for form in work_experience_formset:
+                if form.has_changed():#ignore empty forms
+                    form_is_deleted = form.cleaned_data['is_deleted']
+                    if not form_is_deleted: #ignore deleted (hidden) forms
+                        work_experience_info = form.save(commit = False)
+                        work_experience_info.user = request.user
+                        work_experience_info.save()
+
+            return redirect('reference_letter')
+
+    context = {
+        'work_experience_formset': work_experience_formset
+    }
+
+    return render(request, "main/work_experience.html", context) 
+
+
+login_required(login_url='login') #maybe delete later
+def reference_letter(request):
+    if request.user.groups.filter(name='Grammateia').exists():
+        return redirect('home')
+    
+    reference_letter_formset = ReferenceLetterFormSet(queryset=Reference_letter.objects.none(), prefix = 'reference_letter')
+
+    if request.method == 'POST':
+        reference_letter_formset = ReferenceLetterFormSet(request.POST, prefix = 'reference_letter')
+        if reference_letter_formset.is_valid():
+            for form in reference_letter_formset:
+                if form.has_changed():#ignore empty forms
+                    form_is_deleted = form.cleaned_data['is_deleted']
+                    if not form_is_deleted: #ignore deleted (hidden) forms
+                        reference_letter_info = form.save(commit = False)
+                        reference_letter_info.user = request.user
+                        reference_letter_info.save()
+
+            return redirect('scholarship')
+
+    context = {
+        'reference_letter_formset': reference_letter_formset
+    }
+
+    return render(request, "main/reference_letter.html", context) 
+
+
+login_required(login_url='login') #maybe delete later
+def scholarship(request):
+    if request.user.groups.filter(name='Grammateia').exists():
+        return redirect('home')
+    
+    scholarship_formset = ScholarshipFormSet(queryset=Scholarship.objects.none(), prefix = 'scholarship')
+
+    if request.method == 'POST':
+        scholarship_formset = ScholarshipFormSet(request.POST, prefix = 'scholarship')
+        if scholarship_formset.is_valid():
+            for form in scholarship_formset:
+                if form.has_changed():#ignore empty forms
+                    form_is_deleted = form.cleaned_data['is_deleted']
+                    if not form_is_deleted: #ignore deleted (hidden) forms
+                        scholarship_info = form.save(commit = False)
+                        scholarship_info.user = request.user
+                        scholarship_info.save()
+
+            return redirect('theses')
+
+    context = {
+        'scholarship_formset': scholarship_formset
+    }
+
+    return render(request, "main/scholarship.html", context) 
+
+
+login_required(login_url='login') #maybe delete later
+def theses(request):
+    if request.user.groups.filter(name='Grammateia').exists():
+        return redirect('home')
+    
+    theses_formset = ThesesFormSet(queryset=Theses.objects.none(), prefix = 'theses')
+
+    if request.method == 'POST':
+        theses_formset = ThesesFormSet(request.POST, prefix = 'theses')
+        if theses_formset.is_valid():
+            for form in theses_formset:
+                if form.has_changed():#ignore empty forms
+                    form_is_deleted = form.cleaned_data['is_deleted']
+                    if not form_is_deleted: #ignore deleted (hidden) forms
+                        theses_info = form.save(commit = False)
+                        theses_info.user = request.user
+                        theses_info.save()
+
+            application = Application(user=request.user)
+            application.save()
+            request.user.has_applied = True
+            request.user.save() 
+
+            return redirect('my_application')
+
+    context = {
+        'theses_formset': theses_formset
+    }
+
+    return render(request, "main/theses.html", context)
+    
+
 
 
       

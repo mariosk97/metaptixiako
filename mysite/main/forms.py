@@ -51,7 +51,7 @@ class StudyForm(ModelForm):
             "is_deleted": "Delete",
             "univercity": "Univercity*",
             "department": "Department*",
-            "degree_title": "Degree Title*"
+            "degree_title": "Degree Title"
         }
 
     def __init__(self, *args, **kwargs):
@@ -125,7 +125,7 @@ ForeignLanguageFormSet = inlineformset_factory(
 
 class WorkExperienceForm(ModelForm): 
     start_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
-    end_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    end_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}), required=False)
     
     class Meta:
         model = Work_experience
@@ -201,7 +201,7 @@ ReferenceLetterFormSet = inlineformset_factory(
 
 
 class ScholarshipForm(ModelForm): 
-    acquisition_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    acquisition_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}), required=False)
     
     class Meta:
         model = Scholarship
