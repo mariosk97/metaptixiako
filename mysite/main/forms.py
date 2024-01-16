@@ -5,6 +5,8 @@ from .models import Application, User, Contact_information, Undergraduate, Postg
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
 
+from .fields import ListTextWidget
+
 class ApplicationForm (ModelForm): #currently not used. Done with UserApplicationForm. Delete
     class Meta:
         model = Application
@@ -98,8 +100,11 @@ class ForeignLanguageForm(ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
+        _language_list = kwargs.pop('data_list', None) #now the form needs a parameter when a new instance is created in views.py
         super().__init__(*args, **kwargs)
         self.fields["is_deleted"].widget.attrs.update({"class": "deleteCheckbox"}) 
+        
+        self.fields['language'].widget = ListTextWidget(data_list=_language_list, name='language-list') 
 
     #used to validate a form only if it has not been deleted. Otherwise a half-filled form that was later deleted might raise errors, which shouldn't happen
     def clean(self):

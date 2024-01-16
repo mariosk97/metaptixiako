@@ -102,7 +102,8 @@ def create_application(request):
     undergraduate_formset = UndergraduateFormSet(queryset=Undergraduate.objects.none(), prefix = 'undergraduate')
     print(Undergraduate._meta.get_fields())
     postgraduate_formset = PostgraduateFormSet(queryset=Postgraduate.objects.none(), prefix = 'postgraduate')
-    foreign_language_formset = ForeignLanguageFormSet(queryset=Foreign_language.objects.none(), prefix = 'foreign_language')
+    foreign_language_formset = ForeignLanguageFormSet(queryset=Foreign_language.objects.none(), prefix = 'foreign_language', 
+                                                      form_kwargs={'data_list': ('English', 'French', 'German', 'Italian')}) #suggestions for language field
     work_experience_formset = WorkExperienceFormSet(queryset=Work_experience.objects.none(), prefix = 'work_experience')
     reference_letter_formset = ReferenceLetterFormSet(queryset=Reference_letter.objects.none(), prefix = 'reference_letter')
     scholarship_formset = ScholarshipFormSet(queryset=Scholarship.objects.none(), prefix = 'scholarship')
@@ -226,7 +227,7 @@ def update_application(request, pk): #change an application that has already bee
     contact_info_form = ContactInformationForm(instance = Contact_information.objects.get(user=user))
     undergraduate_formset = UndergraduateFormSet(instance = user)
     postgraduate_formset = PostgraduateFormSet(instance = user)
-    foreign_language_formset = ForeignLanguageFormSet(instance = user)
+    foreign_language_formset = ForeignLanguageFormSet(instance = user, form_kwargs={'data_list': ('English', 'French', 'German', 'Italian')}) #suggestions for language field
     work_experience_formset = WorkExperienceFormSet(instance = user)
     reference_letter_formset = ReferenceLetterFormSet(instance = user)
     scholarship_formset = ScholarshipFormSet(instance = user)
@@ -547,8 +548,9 @@ def foreign_language(request):
     if request.user.groups.filter(name='Grammateia').exists():
         return redirect('home')
     
-    foreign_language_formset = ForeignLanguageFormSet(queryset=Foreign_language.objects.none(), prefix = 'foreign_language')
-
+    foreign_language_formset = ForeignLanguageFormSet(queryset=Foreign_language.objects.none(), prefix = 'foreign_language', 
+                                                      form_kwargs={'data_list': ('English', 'French', 'German', 'Italian')} ) #suggestions for language field
+    
     if request.method == 'POST':
         foreign_language_formset = ForeignLanguageFormSet(request.POST, prefix = 'foreign_language')
         if foreign_language_formset.is_valid():
