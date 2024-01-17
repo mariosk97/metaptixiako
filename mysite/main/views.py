@@ -103,7 +103,8 @@ def create_application(request):
     print(Undergraduate._meta.get_fields())
     postgraduate_formset = PostgraduateFormSet(queryset=Postgraduate.objects.none(), prefix = 'postgraduate')
     foreign_language_formset = ForeignLanguageFormSet(queryset=Foreign_language.objects.none(), prefix = 'foreign_language', 
-                                                      form_kwargs={'data_list': ('English', 'French', 'German', 'Italian')}) #suggestions for language field
+                                                      form_kwargs={'language_data_list': ('English', 'French', 'German', 'Italian'), #suggestions for language field
+                                                                   'level_data_list': ('A1', 'A2', 'B1', 'B2', 'C1', 'C2')}) #suggestions for level field
     work_experience_formset = WorkExperienceFormSet(queryset=Work_experience.objects.none(), prefix = 'work_experience')
     reference_letter_formset = ReferenceLetterFormSet(queryset=Reference_letter.objects.none(), prefix = 'reference_letter')
     scholarship_formset = ScholarshipFormSet(queryset=Scholarship.objects.none(), prefix = 'scholarship')
@@ -227,7 +228,9 @@ def update_application(request, pk): #change an application that has already bee
     contact_info_form = ContactInformationForm(instance = Contact_information.objects.get(user=user))
     undergraduate_formset = UndergraduateFormSet(instance = user)
     postgraduate_formset = PostgraduateFormSet(instance = user)
-    foreign_language_formset = ForeignLanguageFormSet(instance = user, form_kwargs={'data_list': ('English', 'French', 'German', 'Italian')}) #suggestions for language field
+    foreign_language_formset = ForeignLanguageFormSet(instance = user, 
+                                                      form_kwargs={'language_data_list': ('English', 'French', 'German', 'Italian'), #suggestions for language field
+                                                                   'level_data_list': ('A1', 'A2', 'B1', 'B2', 'C1', 'C2')}) #suggestions for level field
     work_experience_formset = WorkExperienceFormSet(instance = user)
     reference_letter_formset = ReferenceLetterFormSet(instance = user)
     scholarship_formset = ScholarshipFormSet(instance = user)
@@ -447,12 +450,7 @@ def user_information(request):
     if request.method == 'POST': 
         user_form = UserApplicationForm(request.POST, instance = request.user)
         if user_form.is_valid():
-            user_form.save()
-
-            #application = Application(user=request.user)
-            #application.save()
-            #request.user.has_applied = True
-            #request.user.save()              
+            user_form.save()            
                 
             return redirect('contact_information')
 
@@ -473,9 +471,21 @@ def contact_information(request):
     if request.method == 'POST':
         contact_info_form = ContactInformationForm(request.POST)
         if contact_info_form.is_valid():
-            contact_info = contact_info_form.save(commit = False)
-            contact_info.user = request.user
-            contact_info.save()
+            
+            #contact_info = contact_info_form.save(commit = False)
+            #contact_info.user = request.user
+            #contact_info.save()
+            
+            clean_data = contact_info_form.cleaned_data
+            Contact_information.objects.update_or_create(
+            user = request.user,
+            
+            defaults={"home_number": clean_data['home_number'],
+                      "cell_number": clean_data['cell_number']},
+            create_defaults={"user": request.user, 
+                            "home_number": clean_data['home_number'],
+                            "cell_number": clean_data['cell_number']},
+            )
 
             return redirect('undergraduate')
 
@@ -549,7 +559,8 @@ def foreign_language(request):
         return redirect('home')
     
     foreign_language_formset = ForeignLanguageFormSet(queryset=Foreign_language.objects.none(), prefix = 'foreign_language', 
-                                                      form_kwargs={'data_list': ('English', 'French', 'German', 'Italian')} ) #suggestions for language field
+                                                      form_kwargs={'language_data_list': ('English', 'French', 'German', 'Italian'), #suggestions for language field
+                                                                   'level_data_list': ('A1', 'A2', 'B1', 'B2', 'C1', 'C2')}) #suggestions for level field
     
     if request.method == 'POST':
         foreign_language_formset = ForeignLanguageFormSet(request.POST, prefix = 'foreign_language')
@@ -670,10 +681,10 @@ def theses(request):
                         theses_info.user = request.user
                         theses_info.save()
 
-            application = Application(user=request.user)
-            application.save()
-            request.user.has_applied = True
-            request.user.save() 
+            #application = Application(user=request.user)
+            #application.save()
+            #request.user.has_applied = True
+            #request.user.save() 
 
             return redirect('my_application')
 
@@ -682,6 +693,44 @@ def theses(request):
     }
 
     return render(request, "main/theses.html", context)
+
+
+login_required(login_url='login') #maybe delete later
+def my_profile(request):
+    if request.user.groups.filter(name='Grammateia').exists():
+        return redirect('home')
+    
+    user=request.user
+    try:
+        contact_information = Contact_information.objects.get(user=user)
+    except Contact_information.DoesNotExist:
+        contact_information = None
+
+    undergraduate_info = Undergraduate.objects.filter(user=user)
+    postgraduate_info = Postgraduate.objects.filter(user=user)
+    foreign_language_info = Foreign_language.objects.filter(user=user)
+    work_experience_info = Work_experience.objects.filter(user=user)
+    reference_letter_info = Reference_letter.objects.filter(user=user)
+    scholarship_info = Scholarship.objects.filter(user=user)
+    theses_info = Theses.objects.filter(user=user)
+    try:
+        application = Application.objects.get(user=request.user)
+    except Application.DoesNotExist:
+        application = None
+
+    context = {'application': application, 
+               'user': user, 
+               'contact_information': contact_information, 
+               'undergraduate_info': undergraduate_info, 
+               'postgraduate_info': postgraduate_info, 
+               'foreign_language_info': foreign_language_info, 
+               'work_experience_info': work_experience_info,
+               'reference_letter_info': reference_letter_info,
+               'scholarship_info': scholarship_info,
+               'theses_info': theses_info}
+    return render(request, "main/my_profile.html", context)
+
+
     
 
 

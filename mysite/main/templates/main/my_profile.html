@@ -1,0 +1,74 @@
+{% extends 'main/base.html' %}
+
+{% block content %}
+<div class="container">
+    <p> My Profile</p>
+
+    <div>   
+        <dl class="row">
+            <dt class="col-sm-3">First Name</dt>
+            <dd class="col-sm-9">{{user.first_name}}</dd>
+          
+            <dt class="col-sm-3">Last Name</dt>
+            <dd class="col-sm-9">{{user.last_name}}</dd>
+
+            <dt class="col-sm-3">Marital Status</dt>
+            <dd class="col-sm-9">{{user.marital_status}}</dd>
+
+            <dt class="col-sm-3">Home Number</dt>
+            <dd class="col-sm-9">{{contact_information.home_number}}</dd>
+
+            <dt class="col-sm-3">Cell Number</dt>
+            <dd class="col-sm-9">{{contact_information.cell_number}}</dd>
+
+            {% for form in undergraduate_info %}
+            <dt class="col-sm-3">Undergraduate</dt>
+            <dd class="col-sm-9">{{form.univercity}}</dd>
+            {% endfor %}
+
+            {% for form in postgraduate_info %}
+            <dt class="col-sm-3">Postgraduate</dt>
+            <dd class="col-sm-9">{{form.univercity}}</dd>
+            {% endfor %}
+
+            {% for form in foreign_language_info %}
+            <dt class="col-sm-3">Foreign Language</dt>
+            <dd class="col-sm-9">{{form.language}}</dd>
+            {% endfor %}
+
+            {% for form in work_experience_info %}
+            <dt class="col-sm-3">Work experience</dt>
+            <dd class="col-sm-9">{{form.position}}</dd>
+            {% endfor %}
+
+            {% for form in reference_letter_info %}
+            <dt class="col-sm-3">Reference letter</dt>
+            <dd class="col-sm-9">{{form.full_name}}</dd>
+            {% endfor %}
+
+            {% for form in scholarship_info %}
+            <dt class="col-sm-3">Scholarship</dt>
+            <dd class="col-sm-9">{{form.educational_institution}}</dd>
+            {% endfor %}
+
+            {% for form in theses_info %}
+            <dt class="col-sm-3">Theses</dt>
+            <dd class="col-sm-9">{{form.title}}</dd>
+            {% endfor %}
+
+            
+            <dt class="col-sm-3"> Application Status</dt>
+            {% if not user.has_applied %}
+            <dd class="col-sm-9">Has not applied</dd>
+            {% elif application.is_accepted %}
+            <dd class="col-sm-9">Accepted</dd>
+            {% elif application.is_validated%}
+            <dd class="col-sm-9">Validated</dd>
+            {% else %}
+            <dd class="col-sm-9">Pending validation</dd>
+            {% endif %}
+        </dl> 
+    </div>    
+    <a href = "{% url 'user_information' %}">Set Up Pofile</a>
+</div>
+{% endblock %}

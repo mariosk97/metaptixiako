@@ -100,11 +100,13 @@ class ForeignLanguageForm(ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
-        _language_list = kwargs.pop('data_list', None) #now the form needs a parameter when a new instance is created in views.py
+        _language_list = kwargs.pop('language_data_list', None) #now the form needs a parameter when a new instance is created in views.py
+        _level_list = kwargs.pop('level_data_list', None)
         super().__init__(*args, **kwargs)
         self.fields["is_deleted"].widget.attrs.update({"class": "deleteCheckbox"}) 
         
         self.fields['language'].widget = ListTextWidget(data_list=_language_list, name='language-list') 
+        self.fields['level'].widget = ListTextWidget(data_list=_level_list, name='level-list') 
 
     #used to validate a form only if it has not been deleted. Otherwise a half-filled form that was later deleted might raise errors, which shouldn't happen
     def clean(self):

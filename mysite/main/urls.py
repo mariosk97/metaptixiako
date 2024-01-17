@@ -24,6 +24,7 @@ urlpatterns = [
     path("reference-letter/", views.reference_letter, name="reference_letter"),
     path("scholarship/", views.scholarship, name="scholarship"),
     path("theses/", views.theses, name="theses"),
+    path("my-profile/", views.my_profile, name="my_profile"),
     
 
 ]
