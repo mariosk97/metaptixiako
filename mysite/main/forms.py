@@ -1,9 +1,11 @@
 from django.forms import ModelForm
 from django.forms import modelformset_factory, inlineformset_factory
 from django import forms
-from .models import Application, User, Contact_information, Undergraduate, Postgraduate, Studies, Foreign_language, Work_experience, Reference_letter, Scholarship, Theses
+from .models import Application, User, Contact_information, Undergraduate, Postgraduate, Studies, Foreign_language, Work_experience, Reference_letter, Scholarship, Theses, Masters, Orientation
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
+
+from .fields import ListTextWidget
 
 class ApplicationForm (ModelForm): #currently not used. Done with UserApplicationForm. Delete
     class Meta:
@@ -51,7 +53,7 @@ class StudyForm(ModelForm):
             "is_deleted": "Delete",
             "univercity": "Univercity*",
             "department": "Department*",
-            "degree_title": "Degree Title*"
+            "degree_title": "Degree Title"
         }
 
     def __init__(self, *args, **kwargs):
@@ -98,8 +100,13 @@ class ForeignLanguageForm(ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
+        _language_list = kwargs.pop('language_data_list', None) #now the form needs a parameter when a new instance is created in views.py
+        _level_list = kwargs.pop('level_data_list', None)
         super().__init__(*args, **kwargs)
         self.fields["is_deleted"].widget.attrs.update({"class": "deleteCheckbox"}) 
+        
+        self.fields['language'].widget = ListTextWidget(data_list=_language_list, name='language-list') 
+        self.fields['level'].widget = ListTextWidget(data_list=_level_list, name='level-list') 
 
     #used to validate a form only if it has not been deleted. Otherwise a half-filled form that was later deleted might raise errors, which shouldn't happen
     def clean(self):
@@ -125,7 +132,7 @@ ForeignLanguageFormSet = inlineformset_factory(
 
 class WorkExperienceForm(ModelForm): 
     start_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
-    end_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    end_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}), required=False)
     
     class Meta:
         model = Work_experience
@@ -201,7 +208,7 @@ ReferenceLetterFormSet = inlineformset_factory(
 
 
 class ScholarshipForm(ModelForm): 
-    acquisition_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    acquisition_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}), required=False)
     
     class Meta:
         model = Scholarship
@@ -270,3 +277,25 @@ ThesesFormSet = inlineformset_factory(
 )
 
 
+class MastersForm(ModelForm): 
+    name = forms.ModelChoiceField(queryset = Masters.objects.all())
+
+    class Meta:
+        model = Masters
+        exclude = ['user'] #automatically assigned from create application view
+
+
+class OrientationForm(ModelForm): 
+    name = forms.ModelChoiceField(queryset=None)
+
+    class Meta:
+        model = Masters
+        exclude = ['user'] #automatically assigned from create application view   
+
+
+    def __init__(self, masters, *args, **kwargs):
+        super(OrientationForm, self).__init__(*args, **kwargs)
+        self.fields['name'].queryset = Orientation.objects.filter(masters=masters)         
+           
+
+       

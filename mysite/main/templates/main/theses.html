@@ -1,0 +1,78 @@
+{% extends 'main/base.html' %}
+{% block content %}
+{% load crispy_forms_tags %}
+<div class="container"> <!--class used for bootstrap-->
+    <form id="form-container" method="POST" action=""> 
+        {% csrf_token %}
+        {{theses_formset.management_form}}
+        {% for form in theses_formset %}
+        {% if form.is_deleted.value %}
+        <div class="theses-form entire-form" style="display: none;"> <!-- used in case user has deleted the form and page refreshes because of validations errors -->
+            {{form|crispy}}
+        </div>
+        {% else %}
+        <div class="theses-form entire-form">
+            {{form|crispy}}
+        </div>
+        {% endif %}
+        {% endfor %}
+
+        
+        <button id="add_theses_form" type="button" class="btn btn-secondary">Add Theses</button>
+
+        <input type="submit" value="Submit" class="btn btn-primary"/>
+    </form>
+</div>        
+
+<script>
+    let container = document.querySelector("#form-container")
+    let thesesForm = document.querySelectorAll(".theses-form")
+    let addThesesButton = document.querySelector("#add_theses_form")
+    let thesesFormNum = thesesForm.length-1
+    let emptyThesesFormNum = thesesFormNum
+    let thesesPrefix = "theses"
+    let totalThesesForms = document.querySelector("#id_theses-TOTAL_FORMS")
+    //first form is hidden so there is always an empty form to be copied by addForm if page is refreshed because of validation errors plus user has deleted all forms
+    thesesForm[0].style.display = 'none' 
+
+    addThesesButton.addEventListener('click', (e) => {    
+        thesesFormNum = incrementFormNum(thesesFormNum);
+        console.log("thesesFormNum: " + thesesFormNum);
+        addForm(e, thesesForm, thesesPrefix, thesesFormNum, addThesesButton, emptyThesesFormNum, totalThesesForms); 
+    });
+
+    const incrementFormNum = (num) => ++num;
+
+    function addForm(e, formType, prefix, formNum, buttonType, emptyFormNum, totalForms){
+        e.preventDefault()
+
+        let newForm = formType[emptyFormNum].cloneNode(true)
+        let formRegex = RegExp(`${prefix}-(\\d){1}-`,'g')
+        console.log(formRegex)
+
+        //undergraduateFormNum++ //this works
+        newForm.innerHTML = newForm.innerHTML.replace(formRegex, `${prefix}-${formNum}-`)
+        newForm.style.display = 'block' //copied form is hidden
+        console.log(newForm)
+        container.insertBefore(newForm, buttonType)
+            
+        totalForms.setAttribute('value', `${formNum+1}`)
+    }
+
+    container.addEventListener('change', e => {
+        hideForm(e)
+    });
+
+    function hideForm(e){
+        if(e.target.checked && e.target.classList.contains("deleteCheckbox")){
+            console.log("delete")
+            //form = e.target.closest("div")
+            form = e.target.closest(".entire-form")
+            form.style.display = 'none'
+        }
+    }
+
+
+</script>    
+
+{% endblock %} 

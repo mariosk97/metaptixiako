@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .models import Application, User, Contact_information, Undergraduate, Postgraduate, Foreign_language, Work_experience, Reference_letter, Scholarship, Theses
-from .forms import (UserRegisterForm, UserApplicationForm, ContactInformationForm, 
+from .models import Application, User, Contact_information, Undergraduate, Postgraduate, Foreign_language, Work_experience, Reference_letter, Scholarship, Theses, Masters
+from .forms import (UserRegisterForm, UserApplicationForm, ContactInformationForm, MastersForm, OrientationForm,
                     UndergraduateFormSet, PostgraduateFormSet, ForeignLanguageFormSet, WorkExperienceFormSet, ReferenceLetterFormSet, ScholarshipFormSet, ThesesFormSet)
 from django.contrib.auth import authenticate, login, logout
 
@@ -102,7 +102,9 @@ def create_application(request):
     undergraduate_formset = UndergraduateFormSet(queryset=Undergraduate.objects.none(), prefix = 'undergraduate')
     print(Undergraduate._meta.get_fields())
     postgraduate_formset = PostgraduateFormSet(queryset=Postgraduate.objects.none(), prefix = 'postgraduate')
-    foreign_language_formset = ForeignLanguageFormSet(queryset=Foreign_language.objects.none(), prefix = 'foreign_language')
+    foreign_language_formset = ForeignLanguageFormSet(queryset=Foreign_language.objects.none(), prefix = 'foreign_language', 
+                                                      form_kwargs={'language_data_list': ('English', 'French', 'German', 'Italian'), #suggestions for language field
+                                                                   'level_data_list': ('A1', 'A2', 'B1', 'B2', 'C1', 'C2')}) #suggestions for level field
     work_experience_formset = WorkExperienceFormSet(queryset=Work_experience.objects.none(), prefix = 'work_experience')
     reference_letter_formset = ReferenceLetterFormSet(queryset=Reference_letter.objects.none(), prefix = 'reference_letter')
     scholarship_formset = ScholarshipFormSet(queryset=Scholarship.objects.none(), prefix = 'scholarship')
@@ -226,7 +228,9 @@ def update_application(request, pk): #change an application that has already bee
     contact_info_form = ContactInformationForm(instance = Contact_information.objects.get(user=user))
     undergraduate_formset = UndergraduateFormSet(instance = user)
     postgraduate_formset = PostgraduateFormSet(instance = user)
-    foreign_language_formset = ForeignLanguageFormSet(instance = user)
+    foreign_language_formset = ForeignLanguageFormSet(instance = user, 
+                                                      form_kwargs={'language_data_list': ('English', 'French', 'German', 'Italian'), #suggestions for language field
+                                                                   'level_data_list': ('A1', 'A2', 'B1', 'B2', 'C1', 'C2')}) #suggestions for level field
     work_experience_formset = WorkExperienceFormSet(instance = user)
     reference_letter_formset = ReferenceLetterFormSet(instance = user)
     scholarship_formset = ScholarshipFormSet(instance = user)
@@ -434,7 +438,352 @@ def accept_application(request, pk):
     return render(request, "main/accept.html", context)
     
 
+####POLLA SUBMIT
 
+@login_required(login_url='login') #maybe delete later
+def user_information(request):
+    if request.user.groups.filter(name='Grammateia').exists():
+        return redirect('home')
+    
+    user_form = UserApplicationForm(instance = request.user) #some information was filled during registration so it should be populated with existing data
+
+    if request.method == 'POST': 
+        user_form = UserApplicationForm(request.POST, instance = request.user)
+        if user_form.is_valid():
+            user_form.save()            
+                
+            return redirect('contact_information')
+
+    context = {
+        'user_form': user_form
+    }
+
+    return render(request, "main/user_information.html", context) 
+
+
+login_required(login_url='login') #maybe delete later
+def contact_information(request):
+    if request.user.groups.filter(name='Grammateia').exists():
+        return redirect('home')
+    
+    contact_info_form = ContactInformationForm()
+
+    if request.method == 'POST':
+        contact_info_form = ContactInformationForm(request.POST)
+        if contact_info_form.is_valid():
+            
+            #contact_info = contact_info_form.save(commit = False)
+            #contact_info.user = request.user
+            #contact_info.save()
+            
+            clean_data = contact_info_form.cleaned_data
+            Contact_information.objects.update_or_create(
+            user = request.user,
+            
+            defaults={"home_number": clean_data['home_number'],
+                      "cell_number": clean_data['cell_number']},
+            create_defaults={"user": request.user, 
+                            "home_number": clean_data['home_number'],
+                            "cell_number": clean_data['cell_number']},
+            )
+
+            return redirect('undergraduate')
+
+    context = {
+        'contact_info_form': contact_info_form
+    }
+
+    return render(request, "main/contact_information.html", context) 
+
+
+login_required(login_url='login') #maybe delete later
+def undergraduate(request):
+    if request.user.groups.filter(name='Grammateia').exists():
+        return redirect('home')
+    
+    undergraduate_formset = UndergraduateFormSet(queryset=Undergraduate.objects.none(), prefix = 'undergraduate')
+
+    if request.method == 'POST':
+        undergraduate_formset = UndergraduateFormSet(request.POST, prefix = 'undergraduate')
+        if undergraduate_formset.is_valid():
+            for form in undergraduate_formset:
+                if form.has_changed():#ignore empty forms
+                    form_is_deleted = form.cleaned_data['is_deleted']
+                    if not form_is_deleted: #ignore deleted (hidden) forms
+                        undergraduate_info = form.save(commit = False)
+                        undergraduate_info.user = request.user
+                        undergraduate_info.save()
+
+            return redirect('postgraduate')
+
+    context = {
+        'undergraduate_formset': undergraduate_formset
+    }
+
+    return render(request, "main/undergraduate.html", context) 
+
+
+login_required(login_url='login') #maybe delete later
+def postgraduate(request):
+    if request.user.groups.filter(name='Grammateia').exists():
+        return redirect('home')
+    
+    postgraduate_formset = PostgraduateFormSet(queryset=Postgraduate.objects.none(), prefix = 'postgraduate')
+
+    if request.method == 'POST':
+        postgraduate_formset = PostgraduateFormSet(request.POST, prefix = 'postgraduate')
+        if postgraduate_formset.is_valid():
+            for form in postgraduate_formset:
+                if form.has_changed():#ignore empty forms
+                    form_is_deleted = form.cleaned_data['is_deleted']
+                    if not form_is_deleted: #ignore deleted (hidden) forms
+                        postgraduate_info = form.save(commit = False)
+                        postgraduate_info.user = request.user
+                        postgraduate_info.save()
+
+            return redirect('foreign_language')
+
+        else:
+            print("not valid")
+
+    context = {
+        'postgraduate_formset': postgraduate_formset
+    }
+
+    return render(request, "main/postgraduate.html", context) 
+
+
+login_required(login_url='login') #maybe delete later
+def foreign_language(request):
+    if request.user.groups.filter(name='Grammateia').exists():
+        return redirect('home')
+    
+    foreign_language_formset = ForeignLanguageFormSet(queryset=Foreign_language.objects.none(), prefix = 'foreign_language', 
+                                                      form_kwargs={'language_data_list': ('English', 'French', 'German', 'Italian'), #suggestions for language field
+                                                                   'level_data_list': ('A1', 'A2', 'B1', 'B2', 'C1', 'C2')}) #suggestions for level field
+    
+    if request.method == 'POST':
+        foreign_language_formset = ForeignLanguageFormSet(request.POST, prefix = 'foreign_language')
+        if foreign_language_formset.is_valid():
+            for form in foreign_language_formset:
+                if form.has_changed():#ignore empty forms
+                    form_is_deleted = form.cleaned_data['is_deleted']
+                    if not form_is_deleted: #ignore deleted (hidden) forms
+                        foreign_language_info = form.save(commit = False)
+                        foreign_language_info.user = request.user
+                        foreign_language_info.save()
+
+            return redirect('work_experience')
+
+    context = {
+        'foreign_language_formset': foreign_language_formset
+    }
+
+    return render(request, "main/foreign_language.html", context) 
+
+
+login_required(login_url='login') #maybe delete later
+def work_experience(request):
+    if request.user.groups.filter(name='Grammateia').exists():
+        return redirect('home')
+    
+    work_experience_formset = WorkExperienceFormSet(queryset=Work_experience.objects.none(), prefix = 'work_experience')
+
+    if request.method == 'POST':
+        work_experience_formset = WorkExperienceFormSet(request.POST, prefix = 'work_experience')
+        if work_experience_formset.is_valid():
+            for form in work_experience_formset:
+                if form.has_changed():#ignore empty forms
+                    form_is_deleted = form.cleaned_data['is_deleted']
+                    if not form_is_deleted: #ignore deleted (hidden) forms
+                        work_experience_info = form.save(commit = False)
+                        work_experience_info.user = request.user
+                        work_experience_info.save()
+
+            return redirect('reference_letter')
+
+    context = {
+        'work_experience_formset': work_experience_formset
+    }
+
+    return render(request, "main/work_experience.html", context) 
+
+
+login_required(login_url='login') #maybe delete later
+def reference_letter(request):
+    if request.user.groups.filter(name='Grammateia').exists():
+        return redirect('home')
+    
+    reference_letter_formset = ReferenceLetterFormSet(queryset=Reference_letter.objects.none(), prefix = 'reference_letter')
+
+    if request.method == 'POST':
+        reference_letter_formset = ReferenceLetterFormSet(request.POST, prefix = 'reference_letter')
+        if reference_letter_formset.is_valid():
+            for form in reference_letter_formset:
+                if form.has_changed():#ignore empty forms
+                    form_is_deleted = form.cleaned_data['is_deleted']
+                    if not form_is_deleted: #ignore deleted (hidden) forms
+                        reference_letter_info = form.save(commit = False)
+                        reference_letter_info.user = request.user
+                        reference_letter_info.save()
+
+            return redirect('scholarship')
+
+    context = {
+        'reference_letter_formset': reference_letter_formset
+    }
+
+    return render(request, "main/reference_letter.html", context) 
+
+
+login_required(login_url='login') #maybe delete later
+def scholarship(request):
+    if request.user.groups.filter(name='Grammateia').exists():
+        return redirect('home')
+    
+    scholarship_formset = ScholarshipFormSet(queryset=Scholarship.objects.none(), prefix = 'scholarship')
+
+    if request.method == 'POST':
+        scholarship_formset = ScholarshipFormSet(request.POST, prefix = 'scholarship')
+        if scholarship_formset.is_valid():
+            for form in scholarship_formset:
+                if form.has_changed():#ignore empty forms
+                    form_is_deleted = form.cleaned_data['is_deleted']
+                    if not form_is_deleted: #ignore deleted (hidden) forms
+                        scholarship_info = form.save(commit = False)
+                        scholarship_info.user = request.user
+                        scholarship_info.save()
+
+            return redirect('theses')
+
+    context = {
+        'scholarship_formset': scholarship_formset
+    }
+
+    return render(request, "main/scholarship.html", context) 
+
+
+login_required(login_url='login') #maybe delete later
+def theses(request):
+    if request.user.groups.filter(name='Grammateia').exists():
+        return redirect('home')
+    
+    theses_formset = ThesesFormSet(queryset=Theses.objects.none(), prefix = 'theses')
+
+    if request.method == 'POST':
+        theses_formset = ThesesFormSet(request.POST, prefix = 'theses')
+        if theses_formset.is_valid():
+            for form in theses_formset:
+                if form.has_changed():#ignore empty forms
+                    form_is_deleted = form.cleaned_data['is_deleted']
+                    if not form_is_deleted: #ignore deleted (hidden) forms
+                        theses_info = form.save(commit = False)
+                        theses_info.user = request.user
+                        theses_info.save()
+
+            #application = Application(user=request.user)
+            #application.save()
+            #request.user.has_applied = True
+            #request.user.save() 
+
+            return redirect('my_profile')
+
+    context = {
+        'theses_formset': theses_formset
+    }
+
+    return render(request, "main/theses.html", context)
+
+
+login_required(login_url='login') #maybe delete later
+def my_profile(request):
+    if request.user.groups.filter(name='Grammateia').exists():
+        return redirect('home')
+    
+    user=request.user
+    try:
+        contact_information = Contact_information.objects.get(user=user)
+    except Contact_information.DoesNotExist:
+        contact_information = None
+
+    undergraduate_info = Undergraduate.objects.filter(user=user)
+    postgraduate_info = Postgraduate.objects.filter(user=user)
+    foreign_language_info = Foreign_language.objects.filter(user=user)
+    work_experience_info = Work_experience.objects.filter(user=user)
+    reference_letter_info = Reference_letter.objects.filter(user=user)
+    scholarship_info = Scholarship.objects.filter(user=user)
+    theses_info = Theses.objects.filter(user=user)
+    try:
+        application = Application.objects.get(user=request.user)
+    except Application.DoesNotExist:
+        application = None
+
+    context = {'application': application, 
+               'user': user, 
+               'contact_information': contact_information, 
+               'undergraduate_info': undergraduate_info, 
+               'postgraduate_info': postgraduate_info, 
+               'foreign_language_info': foreign_language_info, 
+               'work_experience_info': work_experience_info,
+               'reference_letter_info': reference_letter_info,
+               'scholarship_info': scholarship_info,
+               'theses_info': theses_info}
+    return render(request, "main/my_profile.html", context)
+
+
+login_required(login_url='login') #maybe delete later
+def choose_master(request):
+    if request.user.groups.filter(name='Grammateia').exists():
+        return redirect('home')
+    
+    masters_form = MastersForm()
+
+    if request.method == 'POST':
+        masters_form = MastersForm(request.POST)
+        if masters_form.is_valid():
+            application = Application(user=request.user, masters= masters_form.cleaned_data['name'])
+            application.save()
+
+            return redirect('home')
+        else:
+            print(masters_form.errors)
+    
+    context = {'masters_form': masters_form
+
+    }
+
+    return render(request, "main/choose_master.html", context)
+
+
+login_required(login_url='login') #maybe delete later
+def choose_orientation(request):
+    if request.user.groups.filter(name='Grammateia').exists():
+        return redirect('home')
+    
+    application = Application.objects.get(user = request.user)
+    master = application.masters
+    orientation_form = OrientationForm(masters=master)
+
+    if request.method == 'POST':
+        masters_form = MastersForm(request.POST)
+        if masters_form.is_valid():
+            application = Application(user=request.user, masters= masters_form.cleaned_data['name'])
+            application.save()
+
+            return redirect('home')
+        else:
+            print(masters_form.errors)
+    
+    context = {'orientation_form': orientation_form
+
+    }
+
+    return render(request, "main/choose_orientation.html", context)
+    
+
+
+
+    
 
 
 
