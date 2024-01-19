@@ -1,0 +1,44 @@
+{% extends 'main/base.html' %}
+
+{% block content %}
+<div class="container">
+    <p> Applications</p>
+    <div>
+        <div>
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col">Master</th>
+                        <th scope="col">Orientation</th>
+                        <th scope="col"> Status</th>
+                        <th scope="col">Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for application in applications %}
+                    <tr>
+                        <td scope="row">{{application.master}}</td>
+                        <td scope="row">{{application.orientation}}</td>
+                        <td scope="row">
+                            {% if application.is_accepted %}
+                            Accepted
+                            {% elif application.is_validated %}
+                            Validated
+                            {% else %}
+                            Pending validation
+                            {% endif %}
+                        </td>
+                        <td scope="row"> 
+                            {% if not application.is_validated %}
+                            <a href = "{% url 'update_application' application.id %}">Edit</a>
+                            {% endif %}
+                            <a href = "{% url 'delete_application' application.id %}">Delete</a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>            
+        </div>
+    </div>    
+</div>
+{% endblock %}

@@ -10,13 +10,12 @@
 
     {% if request.user.is_authenticated  %}  
     {% if not perms.main.view_application %}
-    {% if not request.user.has_applied %}
-    <a class="nav-item nav-link" href="{% url 'user_information' %}">
+    <a class="nav-item nav-link" href="{% url 'choose_master' %}">
         Create Application
     </a>
-    {% else %}
-    <a class="nav-item nav-link" href="{% url 'my_application' %}">
-        My Application
+    {% if request.user.has_applied %}
+    <a class="nav-item nav-link" href="{% url 'my_applications' %}">
+        My Applications
     </a>
     {% endif %}
     {% endif %}

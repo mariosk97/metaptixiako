@@ -55,18 +55,6 @@
             <dt class="col-sm-3">Theses</dt>
             <dd class="col-sm-9">{{form.title}}</dd>
             {% endfor %}
-
-            
-            <dt class="col-sm-3"> Application Status</dt>
-            {% if not user.has_applied %}
-            <dd class="col-sm-9">Has not applied</dd>
-            {% elif application.is_accepted %}
-            <dd class="col-sm-9">Accepted</dd>
-            {% elif application.is_validated%}
-            <dd class="col-sm-9">Validated</dd>
-            {% else %}
-            <dd class="col-sm-9">Pending validation</dd>
-            {% endif %}
         </dl> 
     </div>    
     <a href = "{% url 'user_information' %}">Set Up Pofile</a>

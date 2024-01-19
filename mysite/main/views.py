@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .models import Application, User, Contact_information, Undergraduate, Postgraduate, Foreign_language, Work_experience, Reference_letter, Scholarship, Theses, Masters
-from .forms import (UserRegisterForm, UserApplicationForm, ContactInformationForm, MastersForm, OrientationForm,
+from .models import Application, User, Contact_information, Undergraduate, Postgraduate, Foreign_language, Work_experience, Reference_letter, Scholarship, Theses, Master
+from .forms import (UserRegisterForm, UserApplicationForm, ContactInformationForm, MasterForm, OrientationForm,
                     UndergraduateFormSet, PostgraduateFormSet, ForeignLanguageFormSet, WorkExperienceFormSet, ReferenceLetterFormSet, ScholarshipFormSet, ThesesFormSet)
 from django.contrib.auth import authenticate, login, logout
 
@@ -193,7 +193,7 @@ def create_application(request):
             request.user.has_applied = True
             request.user.save()              
                 
-            return redirect('my_application')
+            return redirect('my_applications')
 
         else: #htmx
             print("something not right")
@@ -315,7 +315,7 @@ def update_application(request, pk): #change an application that has already bee
                 form.delete()     
                  
             application.save() #used in order to change updated field in application model
-            return redirect('my_application') 
+            return redirect('my_applications') 
         else:
             print("not valid") #debugging   
     context = {'user_form': user_form, 
@@ -378,30 +378,21 @@ def delete_application(request, pk): #delete an application
 
 
 @login_required(login_url='login')
-def my_application(request): #shows current users application info
+def my_applications(request): #shows current users application info
     if request.user.groups.filter(name='Grammateia').exists():
         return redirect('home')
+    
     user=request.user
-    contact_information = Contact_information.objects.get(user=user)
-    undergraduate_info = Undergraduate.objects.filter(user=user)
-    postgraduate_info = Postgraduate.objects.filter(user=user)
-    foreign_language_info = Foreign_language.objects.filter(user=user)
-    work_experience_info = Work_experience.objects.filter(user=user)
-    reference_letter_info = Reference_letter.objects.filter(user=user)
-    scholarship_info = Scholarship.objects.filter(user=user)
-    theses_info = Theses.objects.filter(user=user)
-    application = Application.objects.get(user=request.user)
-    context = {'application': application, 
-               'user': user, 
-               'contact_information': contact_information, 
-               'undergraduate_info': undergraduate_info, 
-               'postgraduate_info': postgraduate_info, 
-               'foreign_language_info': foreign_language_info, 
-               'work_experience_info': work_experience_info,
-               'reference_letter_info': reference_letter_info,
-               'scholarship_info': scholarship_info,
-               'theses_info': theses_info}
-    return render(request, "main/my_application.html", context)
+    try:
+        applications = Application.objects.filter(user=request.user)
+    except Application.DoesNotExist:
+        applications = None
+
+    context = {'applications': applications, 
+               'user': user,
+            }
+               
+    return render(request, "main/my_applications.html", context)
 
 
 @login_required(login_url='login') #maybe delete later
@@ -714,11 +705,11 @@ def my_profile(request):
     scholarship_info = Scholarship.objects.filter(user=user)
     theses_info = Theses.objects.filter(user=user)
     try:
-        application = Application.objects.get(user=request.user)
+        applications = Application.objects.filter(user=request.user)
     except Application.DoesNotExist:
-        application = None
+        applications = None
 
-    context = {'application': application, 
+    context = {'applications': applications, 
                'user': user, 
                'contact_information': contact_information, 
                'undergraduate_info': undergraduate_info, 
@@ -736,19 +727,19 @@ def choose_master(request):
     if request.user.groups.filter(name='Grammateia').exists():
         return redirect('home')
     
-    masters_form = MastersForm()
+    master_form = MasterForm()
 
     if request.method == 'POST':
-        masters_form = MastersForm(request.POST)
-        if masters_form.is_valid():
-            application = Application(user=request.user, masters= masters_form.cleaned_data['name'])
+        master_form = MasterForm(request.POST)
+        if master_form.is_valid():
+            application = Application(user=request.user, master= master_form.cleaned_data['name'])
             application.save()
 
-            return redirect('home')
+            return redirect('choose_orientation')
         else:
-            print(masters_form.errors)
+            print(master_form.errors)
     
-    context = {'masters_form': masters_form
+    context = {'master_form': master_form
 
     }
 
@@ -760,19 +751,23 @@ def choose_orientation(request):
     if request.user.groups.filter(name='Grammateia').exists():
         return redirect('home')
     
-    application = Application.objects.get(user = request.user)
-    master = application.masters
-    orientation_form = OrientationForm(masters=master)
+    user_applications = Application.objects.filter(user = request.user).order_by("-created")
+    most_recent__user_application = user_applications[0]
+    master = most_recent__user_application.master
+    orientation_form = OrientationForm(master=master)
 
     if request.method == 'POST':
-        masters_form = MastersForm(request.POST)
-        if masters_form.is_valid():
-            application = Application(user=request.user, masters= masters_form.cleaned_data['name'])
-            application.save()
+        orientation_form = OrientationForm(master=master, data=request.POST)
+        if orientation_form.is_valid():
+            most_recent__user_application.orientation = orientation_form.cleaned_data['name']
+            most_recent__user_application.save()
 
-            return redirect('home')
+            request.user.has_applied = True
+            request.user.save()  
+
+            return redirect('my_applications')
         else:
-            print(masters_form.errors)
+            print(orientation_form.errors)
     
     context = {'orientation_form': orientation_form
 

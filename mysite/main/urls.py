@@ -13,7 +13,7 @@ urlpatterns = [
     path("delete-application/<str:pk>/", views.delete_application, name="delete_application"),
     path("validate-application/<str:pk>/", views.validate_application, name="validate_application"),
     path("accept-application/<str:pk>/", views.accept_application, name="accept_application"),
-    path("my-application/", views.my_application, name="my_application"),  
+    path("my-applications/", views.my_applications, name="my_applications"),  
 
     path("user-information/", views.user_information, name="user_information"),
     path("contact-information/", views.contact_information, name="contact_information"),

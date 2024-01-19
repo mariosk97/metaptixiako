@@ -1,7 +1,7 @@
 from django.forms import ModelForm
 from django.forms import modelformset_factory, inlineformset_factory
 from django import forms
-from .models import Application, User, Contact_information, Undergraduate, Postgraduate, Studies, Foreign_language, Work_experience, Reference_letter, Scholarship, Theses, Masters, Orientation
+from .models import Application, User, Contact_information, Undergraduate, Postgraduate, Studies, Foreign_language, Work_experience, Reference_letter, Scholarship, Theses, Master, Orientation
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
 
@@ -277,25 +277,25 @@ ThesesFormSet = inlineformset_factory(
 )
 
 
-class MastersForm(ModelForm): 
-    name = forms.ModelChoiceField(queryset = Masters.objects.all())
+class MasterForm(ModelForm): 
+    name = forms.ModelChoiceField(queryset = Master.objects.all(), label="Master")
 
     class Meta:
-        model = Masters
+        model = Master
         exclude = ['user'] #automatically assigned from create application view
 
 
 class OrientationForm(ModelForm): 
-    name = forms.ModelChoiceField(queryset=None)
+    name = forms.ModelChoiceField(queryset=None, label="Orientation")
 
     class Meta:
-        model = Masters
+        model = Master
         exclude = ['user'] #automatically assigned from create application view   
 
 
-    def __init__(self, masters, *args, **kwargs):
+    def __init__(self, master, *args, **kwargs):
         super(OrientationForm, self).__init__(*args, **kwargs)
-        self.fields['name'].queryset = Orientation.objects.filter(masters=masters)         
+        self.fields['name'].queryset = Orientation.objects.filter(master=master) #master is added as an argument in choose_orientation view        
            
 
        
