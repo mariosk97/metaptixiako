@@ -9,7 +9,7 @@ urlpatterns = [
     path("applications/", views.applications, name="all_applications"), 
     path("applications/<str:pk>/", views.application, name="application"),
     path("create-application/", views.create_application, name="create_application"),
-    path("update-application/<str:pk>/", views.update_application, name="update_application"),  
+    path("update-master/<str:pk>/", views.update_master, name="update_master"),  
     path("delete-application/<str:pk>/", views.delete_application, name="delete_application"),
     path("validate-application/<str:pk>/", views.validate_application, name="validate_application"),
     path("accept-application/<str:pk>/", views.accept_application, name="accept_application"),
@@ -26,7 +26,8 @@ urlpatterns = [
     path("theses/", views.theses, name="theses"),
     path("my-profile/", views.my_profile, name="my_profile"),
     path("choose-master/", views.choose_master, name="choose_master"),
-    path("choose-orientation/", views.choose_orientation, name="choose_orientation"),
+    path("choose-orientation/<str:pk>/", views.choose_orientation, name="choose_orientation"),
+    
     
 
 ]

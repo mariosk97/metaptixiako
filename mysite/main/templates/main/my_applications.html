@@ -31,7 +31,7 @@
                         </td>
                         <td scope="row"> 
                             {% if not application.is_validated %}
-                            <a href = "{% url 'update_application' application.id %}">Edit</a>
+                            <a href = "{% url 'update_master' application.id %}">Edit</a>
                             {% endif %}
                             <a href = "{% url 'delete_application' application.id %}">Delete</a></td>
                     </tr>

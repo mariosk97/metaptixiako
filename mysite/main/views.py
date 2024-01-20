@@ -336,44 +336,23 @@ def delete_application(request, pk): #delete an application
     context = {'obj': application}
 
     if request.method == 'POST':
-        user = User.objects.get(application=application)
-        user.has_applied = False
-        user.save()
-        contact_information = Contact_information.objects.get(user=user)
-        contact_information.delete()
-        undergraduate_info = Undergraduate.objects.filter(user=user)
-        postgraduate_info = Postgraduate.objects.filter(user=user)
-        foreign_language_info = Foreign_language.objects.filter(user=user)
-        work_experience_info = Work_experience.objects.filter(user=user)
-        reference_letter_info = Reference_letter.objects.filter(user=user)
-        scholarship_info = Scholarship.objects.filter(user=user)
-        theses_info = Theses.objects.filter(user=user)
-
-        for form in undergraduate_info:
-            form.delete()
         
-        for form in postgraduate_info:
-            form.delete()
-
-        for form in foreign_language_info:
-            form.delete()    
-
-        for form in work_experience_info:
-            form.delete()    
-
-        for form in reference_letter_info:
-            form.delete() 
-
-        for form in scholarship_info:
-            form.delete()     
-
-        for form in theses_info:
-            form.delete()      
-
+        user = User.objects.get(application=application)
         application.delete()
+        number_of_applications = Application.objects.filter(user=user).count()
+        print(number_of_applications)
+        if number_of_applications == 0:
+            user.has_applied = False
+            user.save() 
+            return redirect('home')
+        else:
+             return redirect('my_applications')
+
+              
+
         #request.user.has_applied = False #will not work if admin can delete applications
         #request.user.save()
-        return redirect('home')
+        
     return render(request, "main/delete.html", context)   
 
 
@@ -735,7 +714,7 @@ def choose_master(request):
             application = Application(user=request.user, master= master_form.cleaned_data['name'])
             application.save()
 
-            return redirect('choose_orientation')
+            return redirect('choose_orientation', application.id)
         else:
             print(master_form.errors)
     
@@ -747,7 +726,36 @@ def choose_master(request):
 
 
 login_required(login_url='login') #maybe delete later
-def choose_orientation(request):
+def choose_orientation(request, pk):
+    if request.user.groups.filter(name='Grammateia').exists():
+        return redirect('home')
+    
+    application = Application.objects.get(id=pk)
+    master = application.master
+    orientation_form = OrientationForm(master=master)
+
+    if request.method == 'POST':
+        orientation_form = OrientationForm(master=master, data=request.POST)
+        if orientation_form.is_valid():
+            application.orientation = orientation_form.cleaned_data['name']
+            application.save()
+
+            request.user.has_applied = True
+            request.user.save()  
+
+            return redirect('my_applications')
+        else:
+            print(orientation_form.errors)
+    
+    context = {'orientation_form': orientation_form
+
+    }
+
+    return render(request, "main/choose_orientation.html", context)
+
+
+login_required(login_url='login') #maybe delete later
+def choose_orientations(request): #DELETE NOT USEDs
     if request.user.groups.filter(name='Grammateia').exists():
         return redirect('home')
     
@@ -774,7 +782,39 @@ def choose_orientation(request):
     }
 
     return render(request, "main/choose_orientation.html", context)
+
+
+def update_master(request, pk): #change an application that has already been created
+    if request.user.groups.filter(name='Grammateia').exists():
+        return redirect('home')
     
+    application = Application.objects.get(id=pk)
+    print(application.master)
+    #user = User.objects.get(application=application)
+    print(Master.objects.get(name=application.master))
+
+    master_form = MasterForm()
+
+    if request.method == 'POST':
+        master_form = MasterForm(request.POST)
+        if master_form.is_valid():
+            application.master = master_form.cleaned_data['name']
+            application.save()
+
+            return redirect('choose_orientation', application.id)
+        else:
+            print(master_form.errors)
+
+    context = {'master_form': master_form
+
+    }
+
+    return render(request, "main/choose_master.html", context)
+
+
+
+
+
 
 
 
