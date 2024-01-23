@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="container">
-    <p> Application</p>
+    <p> User Information</p>
 
     <div>   
         <dl class="row">
@@ -56,8 +56,18 @@
             <dd class="col-sm-9">{{form.title}}</dd>
             {% endfor %}
 
+            <dd class="col-sm-12">Application Information</dd>
+
+            <dt class="col-sm-3">Master</dt>
+            <dd class="col-sm-9">{{application.master}}</dd>
+
+            <dt class="col-sm-3">Orientation</dt>
+            <dd class="col-sm-9">{{application.orientation}}</dd>
+
             <dt class="col-sm-3">Status</dt>
-            {% if application.is_accepted %}
+            {% if application.is_withdrawn %}
+            <dd class="col-sm-9">Withdrawn</dd>
+            {% elif application.is_accepted %}
             <dd class="col-sm-9">Accepted</dd>
             {% elif application.is_validated%}
             <dd class="col-sm-9">Validated</dd>

@@ -9,8 +9,11 @@
             <table class="table table-hover">
                 <thead>
                     <tr>
-                        <th scope="col">#</th>
+                        
                         <th scope="col">User</th>
+                        <th scope="col">Master</th>
+                        <th scope="col">Orientation</th>
+                        <th scope="col"> Status</th>
                         <!-- <th scope="col">Last Name</th> -->
                         <th scope="col">Actions</th>
                     </tr>
@@ -19,13 +22,28 @@
                 <tbody>
                     {% for application in applications %}
                     <tr>
-                        <th scope="row">{{application.id}}</th>
+                        
                         <td>{{application.user}}</td>
-                        <td><a href="/applications/{{application.id}}">View</a> 
-                        {% if not application.is_validated %}
-                        <a href = "{% url 'validate_application' application.id %}">Validate</a></td>
-                        {% elif not application.is_accepted %}
-                        <a href = "{% url 'accept_application' application.id %}">Accept</a></td>
+                        <td scope="row">{{application.master}}</td>
+                        <td scope="row">{{application.orientation}}</td>
+                        <td scope="row">
+                            {% if application.is_withdrawn %}
+                            Withdrawn
+                            {% elif application.is_accepted %}
+                            Accepted
+                            {% elif application.is_validated %}
+                            Validated
+                            {% else %}
+                            Pending validation
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="/applications/{{application.id}}">View</a> 
+                            {% if not application.is_validated %}
+                            <a href = "{% url 'validate_application' application.id %}">Validate</a></td>
+                            {% elif not application.is_accepted %}
+                            <a href = "{% url 'accept_application' application.id %}">Accept</a>
+                        </td>
                         {% endif %}
                     </tr>
                     {% endfor %}

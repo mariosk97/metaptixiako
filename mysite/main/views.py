@@ -68,9 +68,15 @@ def applications(request): #list of all applications
 def application(request, pk): #info about a specific application
     if not request.user.has_perm("main.view_application"):
         return redirect('home')
+    
     application = Application.objects.get(id=pk)
     user = User.objects.get(application=application)
-    contact_information = Contact_information.objects.get(user=user)
+
+    try:
+        contact_information = Contact_information.objects.get(user=user)
+    except Contact_information.DoesNotExist:
+        contact_information = None
+
     undergraduate_info = Undergraduate.objects.filter(user=user)
     postgraduate_info = Postgraduate.objects.filter(user=user)
     foreign_language_info = Foreign_language.objects.filter(user=user)
@@ -78,8 +84,9 @@ def application(request, pk): #info about a specific application
     reference_letter_info = Reference_letter.objects.filter(user=user)
     scholarship_info = Scholarship.objects.filter(user=user)
     theses_info = Theses.objects.filter(user=user)
-    context = {'application': application, 
-               'user': user, 
+    
+    context = { 'user': user, 
+               'application': application,
                'contact_information': contact_information, 
                'undergraduate_info': undergraduate_info, 
                'postgraduate_info': postgraduate_info,
@@ -338,10 +345,19 @@ def delete_application(request, pk): #delete an application
     if request.method == 'POST':
         
         user = User.objects.get(application=application)
-        application.delete()
+        if not application.is_accepted: #accepted applications should not be deleted from the database
+            application.delete()
+        else:
+            application.is_withdrawn = True 
+            application.save()   
+        
+        users_applications = Application.objects.filter(user=user)
         number_of_applications = Application.objects.filter(user=user).count()
+        number_of_withdrawn_applications = users_applications.filter(is_withdrawn=True).count()
+        print(number_of_withdrawn_applications)
         print(number_of_applications)
-        if number_of_applications == 0:
+        number_of_active_applications = number_of_applications - number_of_withdrawn_applications
+        if number_of_active_applications == 0:
             user.has_applied = False
             user.save() 
             return redirect('home')
@@ -362,13 +378,26 @@ def my_applications(request): #shows current users application info
         return redirect('home')
     
     user=request.user
+
+    try:
+        contact_information = Contact_information.objects.get(user=request.user)
+    except Contact_information.DoesNotExist:
+        contact_information = None 
+
+    if contact_information is None:
+        has_contact_info = False
+    else:
+        has_contact_info = True   
+
     try:
         applications = Application.objects.filter(user=request.user)
+        applications = applications.filter(is_withdrawn=False)
     except Application.DoesNotExist:
         applications = None
 
     context = {'applications': applications, 
                'user': user,
+               'has_contact_info': has_contact_info
             }
                
     return render(request, "main/my_applications.html", context)
@@ -420,9 +449,19 @@ def user_information(request):
     if request.method == 'POST': 
         user_form = UserApplicationForm(request.POST, instance = request.user)
         if user_form.is_valid():
-            user_form.save()            
+            user_form.save() 
+
+            try:
+                contact_information = Contact_information.objects.get(user=request.user)
+            except Contact_information.DoesNotExist:
+                contact_information = None           
                 
-            return redirect('contact_information')
+            if contact_information is None:
+                return redirect('contact_information') #user is trying to create
+            else:
+                return redirect('update_contact_information') #user is trying to update
+        else:        
+            print(user_form.errors)        
 
     context = {
         'user_form': user_form
@@ -670,7 +709,7 @@ def my_profile(request):
     if request.user.groups.filter(name='Grammateia').exists():
         return redirect('home')
     
-    user=request.user
+    user = request.user
     try:
         contact_information = Contact_information.objects.get(user=user)
     except Contact_information.DoesNotExist:
@@ -700,6 +739,240 @@ def my_profile(request):
                'theses_info': theses_info}
     return render(request, "main/my_profile.html", context)
 
+    
+def update_contact_information(request):
+    if request.user.groups.filter(name='Grammateia').exists():
+        return redirect('home')
+    
+    user = request.user
+    contact_info_form = ContactInformationForm(instance = Contact_information.objects.get(user=user))
+
+    if request.method == 'POST':
+        contact_info_form = ContactInformationForm(request.POST, instance = Contact_information.objects.get(user=user))
+        
+        if contact_info_form.is_valid():
+            contact_info_form.save()
+        
+        return redirect('update_undergraduate')
+
+    context = {
+        'contact_info_form': contact_info_form
+    }
+
+    return render(request, "main/contact_information.html", context)
+
+
+def update_undergraduate(request):
+    if request.user.groups.filter(name='Grammateia').exists():
+        return redirect('home')
+    
+    user = request.user
+    undergraduate_formset = UndergraduateFormSet(instance = user, prefix = 'undergraduate')
+    
+    if request.method == 'POST':
+        undergraduate_formset = UndergraduateFormSet(request.POST, instance = user, prefix = 'undergraduate')
+
+        if undergraduate_formset.is_valid():
+            for form in undergraduate_formset:
+                if form.has_changed():
+                    #form.delete() #does not work. Throws error. Can't delete db data using post request data. 
+                    #Data needs to be saved to db first (would work if formset can_delete=True) 
+                    form.save()
+            undergraduate_info = Undergraduate.objects.filter(user=user)
+            undergraduate_info_to_be_deleted = undergraduate_info.filter(is_deleted=True)
+            for form in undergraduate_info_to_be_deleted:
+                form.delete()
+        
+        return redirect('update_postgraduate')
+    
+    context = {
+        'undergraduate_formset': undergraduate_formset
+    }
+
+    return render(request, "main/undergraduate.html", context)
+    
+
+def update_postgraduate(request):
+    if request.user.groups.filter(name='Grammateia').exists():
+        return redirect('home')
+    
+    user = request.user
+    postgraduate_formset = PostgraduateFormSet(instance = user, prefix = 'postgraduate')
+    
+    if request.method == 'POST':
+        postgraduate_formset = PostgraduateFormSet(request.POST, instance = user, prefix = 'postgraduate')
+
+        if postgraduate_formset.is_valid():
+            for form in postgraduate_formset:
+                if form.has_changed():
+                    #form.delete() #does not work. Throws error. Can't delete db data using post request data. 
+                    #Data needs to be saved to db first (would work if formset can_delete=True) 
+                    form.save()
+            postgraduate_info = Postgraduate.objects.filter(user=user)
+            postgraduate_info_to_be_deleted = postgraduate_info.filter(is_deleted=True)
+            for form in postgraduate_info_to_be_deleted:
+                form.delete()
+        
+        return redirect('update_foreign_language')
+    
+    context = {
+        'postgraduate_formset': postgraduate_formset
+    }
+
+    return render(request, "main/postgraduate.html", context) 
+    
+
+def update_foreign_language(request):
+    if request.user.groups.filter(name='Grammateia').exists():
+        return redirect('home')
+    
+    user = request.user
+    foreign_language_formset = ForeignLanguageFormSet(instance = user, prefix = 'foreign_language', 
+                                                      form_kwargs={'language_data_list': ('English', 'French', 'German', 'Italian'), #suggestions for language field
+                                                                   'level_data_list': ('A1', 'A2', 'B1', 'B2', 'C1', 'C2')}) #suggestions for level field)
+    
+    if request.method == 'POST':
+        foreign_language_formset = ForeignLanguageFormSet(request.POST, instance = user, prefix = 'foreign_language')
+
+        if foreign_language_formset.is_valid():
+            for form in foreign_language_formset:
+                if form.has_changed():
+                    #form.delete() #does not work. Throws error. Can't delete db data using post request data. 
+                    #Data needs to be saved to db first (would work if formset can_delete=True) 
+                    form.save()
+            foreign_language_info = Foreign_language.objects.filter(user=user)
+            foreign_language_info_to_be_deleted = foreign_language_info.filter(is_deleted=True)
+            for form in foreign_language_info_to_be_deleted:
+                form.delete()
+        
+        return redirect('update_work_experience')
+    
+    context = {
+        'foreign_language_formset': foreign_language_formset
+    }
+
+    return render(request, "main/foreign_language.html", context) 
+    
+
+def update_work_experience(request):
+    if request.user.groups.filter(name='Grammateia').exists():
+        return redirect('home')
+    
+    user = request.user
+    work_experience_formset = WorkExperienceFormSet(instance = user, prefix = 'work_experience')
+    
+    if request.method == 'POST':
+        work_experience_formset = WorkExperienceFormSet(request.POST, instance = user, prefix = 'work_experience')
+
+        if work_experience_formset.is_valid():
+            for form in work_experience_formset:
+                if form.has_changed():
+                    #form.delete() #does not work. Throws error. Can't delete db data using post request data. 
+                    #Data needs to be saved to db first (would work if formset can_delete=True) 
+                    form.save()
+            work_experience_info = Work_experience.objects.filter(user=user)
+            work_experience_info_to_be_deleted = work_experience_info.filter(is_deleted=True)
+            for form in work_experience_info_to_be_deleted:
+                form.delete()
+        
+        return redirect('update_reference_letter')
+    
+    context = {
+        'work_experience_formset': work_experience_formset
+    }
+
+    return render(request, "main/work_experience.html", context) 
+    
+
+def update_reference_letter(request):
+    if request.user.groups.filter(name='Grammateia').exists():
+        return redirect('home')
+    
+    user = request.user
+    reference_letter_formset = ReferenceLetterFormSet(instance = user, prefix = 'reference_letter')
+    
+    if request.method == 'POST':
+        reference_letter_formset = ReferenceLetterFormSet(request.POST, instance = user, prefix = 'reference_letter')
+
+        if reference_letter_formset.is_valid():
+            for form in reference_letter_formset:
+                if form.has_changed():
+                    #form.delete() #does not work. Throws error. Can't delete db data using post request data. 
+                    #Data needs to be saved to db first (would work if formset can_delete=True) 
+                    form.save()
+            reference_letter_info = Reference_letter.objects.filter(user=user)
+            reference_letter_info_to_be_deleted = reference_letter_info.filter(is_deleted=True)
+            for form in reference_letter_info_to_be_deleted:
+                form.delete()
+        
+        return redirect('update_scholarship')
+
+    context = {
+        'reference_letter_formset': reference_letter_formset
+    }
+
+    return render(request, "main/reference_letter.html", context)  
+
+
+def update_scholarship(request):
+    if request.user.groups.filter(name='Grammateia').exists():
+        return redirect('home')
+    
+    user = request.user
+    scholarship_formset = ScholarshipFormSet(instance = user, prefix = 'scholarship')
+    
+    if request.method == 'POST':
+        scholarship_formset = ScholarshipFormSet(request.POST, instance = user, prefix = 'scholarship')
+
+        if scholarship_formset.is_valid():
+            for form in scholarship_formset:
+                if form.has_changed():
+                    #form.delete() #does not work. Throws error. Can't delete db data using post request data. 
+                    #Data needs to be saved to db first (would work if formset can_delete=True) 
+                    form.save()
+            scholarship_info = Scholarship.objects.filter(user=user)
+            scholarship_info_to_be_deleted = scholarship_info.filter(is_deleted=True)
+            for form in scholarship_info_to_be_deleted:
+                form.delete()
+        
+        return redirect('update_theses')
+    
+    context = {
+        'scholarship_formset': scholarship_formset
+    }
+
+    return render(request, "main/scholarship.html", context)
+
+
+def update_theses(request):
+    if request.user.groups.filter(name='Grammateia').exists():
+        return redirect('home') 
+    
+    user = request.user
+    theses_formset = ThesesFormSet(instance = user, prefix = 'theses')
+
+    if request.method == 'POST':
+        theses_formset = ThesesFormSet(request.POST, instance = user, prefix = 'theses')
+
+        if theses_formset.is_valid():
+            for form in theses_formset:
+                if form.has_changed():
+                    #form.delete() #does not work. Throws error. Can't delete db data using post request data. 
+                    #Data needs to be saved to db first (would work if formset can_delete=True) 
+                    form.save()
+            theses_info = Theses.objects.filter(user=user)
+            theses_info_to_be_deleted = theses_info.filter(is_deleted=True)
+            for form in theses_info_to_be_deleted:
+                form.delete()
+        
+        return redirect('my_profile')  
+
+    context = {
+        'theses_formset': theses_formset
+    }
+
+    return render(request, "main/theses.html", context)             
+
 
 login_required(login_url='login') #maybe delete later
 def choose_master(request):
@@ -726,11 +999,15 @@ def choose_master(request):
 
 
 login_required(login_url='login') #maybe delete later
-def choose_orientation(request, pk):
+def choose_orientation(request, pk): #view used for both create and update
     if request.user.groups.filter(name='Grammateia').exists():
         return redirect('home')
     
     application = Application.objects.get(id=pk)
+
+    if application.is_validated:
+        return redirect('home') #can't update a validated application
+
     master = application.master
     orientation_form = OrientationForm(master=master)
 
@@ -789,6 +1066,10 @@ def update_master(request, pk): #change an application that has already been cre
         return redirect('home')
     
     application = Application.objects.get(id=pk)
+
+    if application.is_validated:
+        return redirect('home') #can't update a validated application
+    
     print(application.master)
     #user = User.objects.get(application=application)
     print(Master.objects.get(name=application.master))

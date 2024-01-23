@@ -3,6 +3,13 @@
 {% block content %}
 <div class="container">
     <p> Applications</p>
+
+    {% if not has_contact_info %}
+    <div class="alert alert-warning" role="alert">
+        Make sure you set up your profile.<a href = "{% url 'user_information' %}"> Click here.</a>   
+    </div>
+    {% endif %}
+
     <div>
         <div>
             <table class="table table-hover">
