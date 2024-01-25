@@ -292,10 +292,11 @@ class OrientationForm(ModelForm):
         model = Master
         exclude = ['user'] #automatically assigned from create application view   
 
-
     def __init__(self, master, *args, **kwargs):
         super(OrientationForm, self).__init__(*args, **kwargs)
-        self.fields['name'].queryset = Orientation.objects.filter(master=master) #master is added as an argument in choose_orientation view        
+        self.fields['name'].queryset = Orientation.objects.filter(master=master) #master is added as an argument in choose_orientation view     
+
+         
            
 
        

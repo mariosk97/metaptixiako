@@ -41,7 +41,7 @@ class User(AbstractUser):
         blank=True
     )
     
-    date_of_birth = models.DateField(null=True) # user should be able to choose. Maybe try date input widget
+    date_of_birth = models.DateField(null=True) 
     place_of_birth = models.CharField(max_length=150, null=True)
     prefecture = models.CharField(max_length=150, null=True) #νομός
     country = models.CharField(max_length=150, null=True)
@@ -61,8 +61,7 @@ class User(AbstractUser):
 
 class Master(models.Model):
     name = models.CharField(max_length=150, null=True)
-    #orientation = models.ForeignKey(Orientation,on_delete=models.CASCADE, null=True)   
-
+      
     def __str__(self):
         return str(self.name) 
     
@@ -76,13 +75,11 @@ class Orientation(models.Model):
 
 
 class Application(models.Model):
-    #readonly_fields = ["created"] #to show created time in admin. Does not work.
-    
     user = models.ForeignKey(User,on_delete=models.CASCADE, null=True) #change null=True
     master = models.ForeignKey(Master,on_delete=models.CASCADE, null=True)
     orientation = models.ForeignKey(Orientation,on_delete=models.CASCADE, null=True)
     updated = models.DateTimeField(auto_now=True)
-    created = models.DateTimeField(auto_now_add=True) #time created should be when has_applied=True
+    created = models.DateTimeField(auto_now_add=True) 
     is_validated = models.BooleanField(default=False)
     is_accepted = models.BooleanField(default=False)
     is_withdrawn = models.BooleanField(default=False)
@@ -95,7 +92,7 @@ class Application(models.Model):
         ]
 
     def __str__(self):
-        return str(self.user) #maybe change to something else later, this is what is shown in admin       
+        return str(self.user) #this is shown in admin       
     
 
 class Contact_information(models.Model):   

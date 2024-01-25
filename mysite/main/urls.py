@@ -40,8 +40,6 @@ urlpatterns = [
 
     path("my-applications/", views.my_applications, name="my_applications"),
 
-    path("create-application/", views.create_application, name="create_application"), #not used??
-
     #Grammateia
     path("applications/", views.applications, name="all_applications"), 
     path("applications/<str:pk>/", views.application, name="application"),
