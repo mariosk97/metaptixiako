@@ -1,91 +1,392 @@
 {% extends 'main/base.html' %}
 
 {% block content %}
-<div class="container">
-    <p> User Information</p>
 
-    <div>   
-        <dl class="row">
-            <dt class="col-sm-3">First Name</dt>
-            <dd class="col-sm-9">{{user.first_name}}</dd>
-
-            <dt class="col-sm-3">Last Name</dt>
-            <dd class="col-sm-9">{{user.last_name}}</dd>
-
-            <dt class="col-sm-3">Marital Status</dt>
-            <dd class="col-sm-9">{{user.marital_status}}</dd>
-
-            <dt class="col-sm-3">Home Number</dt>
-            <dd class="col-sm-9">{{contact_information.home_number}}</dd>
-
-            <dt class="col-sm-3">Cell Number</dt>
-            <dd class="col-sm-9">{{contact_information.cell_number}}</dd>
-
-            {% for form in undergraduate_info %}
-            <dt class="col-sm-3">Undergraduate</dt>
-            <dd class="col-sm-9">{{form.univercity}}</dd>
-            {% endfor %}
-
-            {% for form in postgraduate_info %}
-            <dt class="col-sm-3">Postgraduate</dt>
-            <dd class="col-sm-9">{{form.univercity}}</dd>
-            {% endfor %}
-
-            {% for form in foreign_language_info %}
-            <dt class="col-sm-3">Foreign Language</dt>
-            <dd class="col-sm-9">{{form.language}}</dd>
-            {% endfor %}
-
-            {% for form in work_experience_info %}
-            <dt class="col-sm-3">Work experience</dt>
-            <dd class="col-sm-9">{{form.position}}</dd>
-            {% endfor %}
-
-            {% for form in reference_letter_info %}
-            <dt class="col-sm-3">Reference letter</dt>
-            <dd class="col-sm-9">{{form.full_name}}</dd>
-            {% endfor %}
-
-            {% for form in scholarship_info %}
-            <dt class="col-sm-3">Scholarship</dt>
-            <dd class="col-sm-9">{{form.educational_institution}}</dd>
-            {% endfor %}
-
-            {% for form in theses_info %}
-            <dt class="col-sm-3">Theses</dt>
-            <dd class="col-sm-9">{{form.title}}</dd>
-            {% endfor %}
-
-            <dd class="col-sm-12">Application Information</dd>
-
-            <dt class="col-sm-3">Master</dt>
-            <dd class="col-sm-9">{{application.master}}</dd>
-
-            <dt class="col-sm-3">Orientation</dt>
-            <dd class="col-sm-9">{{application.orientation}}</dd>
-
-            <dt class="col-sm-3">Status</dt>
-            {% if application.is_withdrawn %}
-            <dd class="col-sm-9">Withdrawn</dd>
-            {% elif application.is_accepted %}
-            <dd class="col-sm-9">Accepted</dd>
-            {% elif application.is_validated%}
-            <dd class="col-sm-9">Validated</dd>
-            {% else %}
-            <dd class="col-sm-9">Pending validation</dd>
-            {% endif %}
-
-            {% if not application.is_validated %}
-            <dt class="col-sm-3">
-            <a href = "{% url 'validate_application' application.id %}">Validate</a></dt>
-            {% elif not application.is_accepted %}
-            <dt class="col-sm-3">
-            <a href = "{% url 'accept_application' application.id %}">Accept</a></dt>
-            {% endif %}
+<div  class="ml-4 mr-4">
+    <div class="table-responsive mt-4">
+        <h5>Application</h5>
+        <table class="table table-hover table-bordered">
+            <thead class="thead-light">
+                <tr>
+                    <th scope="col">User</th>
+                    <th scope="col">Master</th>
+                    <th scope="col">Orientation</th>
+                    <th scope="col"> Status</th>
+                    <!-- <th scope="col">Last Name</th> -->
+                    <th scope="col">Actions</th>
+                </tr>
+            </thead>
             
-            
-        </dl> 
-    </div> 
+            <tbody>
+                <tr>
+                    <td>{{application.user}}</td>
+                    <td scope="row">{{application.master}}</td>
+                    <td scope="row">{{application.orientation}}</td>
+                    <td scope="row">
+                        {% if application.is_withdrawn %}
+                        Withdrawn
+                        {% elif application.is_accepted %}
+                        Accepted
+                        {% elif application.is_validated %}
+                        Validated
+                        {% else %}
+                        Pending validation
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="/applications/{{application.id}}">View</a> 
+                        {% if not application.is_validated %}
+                        <a href = "{% url 'validate_application' application.id %}">Validate</a></td>
+                        {% elif not application.is_accepted %}
+                        <a href = "{% url 'accept_application' application.id %}">Accept</a>
+                    </td>
+                    {% endif %}
+                </tr>
+            </tbody>
+        </table>
+    </div>
 
+    <br>
+
+    <div class="table-responsive">
+        <h5>Personal Information</h5>
+        <table class="table table-hover table-bordered">
+            <thead class="thead-light">
+                <tr>
+                    <th scope="col">First Name</th>
+                    <th scope="col">Last Name</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Fathers Name</th>
+                    <th scope="col">Mothers Name</th>
+                    <th scope="col">Marital Status</th>
+                    <th scope="col">Military Service</th>
+                    <th scope="col">Date Of Birth</th>
+                    <th scope="col">Place Of Birth</th>
+                    <th scope="col">Prefecture</th>
+                    <th scope="col">Country</th>
+                    <th scope="col">AMKA</th>
+                    <th scope="col">AFM</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr>
+                    <td scope="row">{{user.first_name}}</td>
+                    <td scope="row">{{user.last_name}}</td>
+                    <td scope="row">{{user.email}}</td>
+                    <td scope="row">{{user.fathers_name}}</td>
+                    <td scope="row">{{user.mothers_name}}</td>
+                    <td scope="row">{{user.marital_status}}</td>
+                    <td scope="row">{{user.military_service}}</td>
+                    <td scope="row">{{user.date_of_birth}}</td>
+                    <td scope="row">{{user.place_of_birth}}</td>
+                    <td scope="row">{{user.prefecture}}</td>
+                    <td scope="row">{{user.country}}</td>
+                    <td scope="row">{{user.amka}}</td>
+                    <td scope="row">{{user.afm}}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>  
+
+    <br>
+
+    <div>
+        <h5>Contact Information</h5>
+        <table class="table table-hover table-bordered">
+            <thead class="thead-light">
+                <tr>
+                    <th scope="col">Home Number</th>
+                    <th scope="col">Cell Number</th>
+                </tr>  
+            </thead>  
+
+            <tbody>
+                <tr>
+                    <td scope="row">{{contact_information.home_number}}</td>
+                    <td scope="row">{{contact_information.cell_number}}</td>
+                </tr>
+            </tbody>        
+        </table>
+    </div>
+
+    <br>
+
+    <div>
+        <h5>Undergradute</h5>
+        <table class="table table-hover table-bordered">
+            <thead class="thead-light">
+                <tr>
+                    <th scope="col">Univercity</th>
+                    <th scope="col">Department</th>
+                    <th scope="col">Degree Title</th>
+                    <th scope="col">Grade</th>
+                    <th scope="col">Photo</th>
+                </tr>  
+            </thead>  
+            
+            <tbody>
+                {% for form in undergraduate_info %}
+                <tr>
+                    <td scope="row">{{form.univercity}}</td>
+                    <td scope="row">{{form.department}}</td>
+                    <td scope="row">{{form.degree_title}}</td>
+                    <td scope="row">{{form.grade}}</td>
+                    <td scope="row">
+                        <img src= "{{form.photo.url}}" width='35px'>
+                    </td> 
+                </tr>
+                {% endfor %}
+            </tbody>  
+        </table>
+    </div>
+
+    </br>
+
+    <div>
+        <h5>Postgraduate</h5>
+        <table class="table table-hover table-bordered">
+            <thead class="thead-light">
+                <tr>
+                    <th scope="col">Univercity</th>
+                    <th scope="col">Department</th>
+                    <th scope="col">Degree Title</th>
+                    <th scope="col">Grade</th>
+                    <th scope="col">Photo</th>
+                </tr>  
+            </thead>  
+
+            <tbody>
+                {% for form in postgraduate_info %}
+                <tr>
+                    <td scope="row">{{form.univercity}}</td>
+                    <td scope="row">{{form.department}}</td>
+                    <td scope="row">{{form.degree_title}}</td>
+                    <td scope="row">{{form.grade}}</td>
+                    <td scope="row">
+                        <img src= "{{form.photo.url}}" width='35px'>
+                    </td> 
+                </tr>
+                {% endfor %}
+            </tbody>        
+        </table>
+    </div>
+
+    </br>
+
+    <div>
+        <h5>Foreign Language</h5>
+        <table class="table table-hover table-bordered">
+            <thead class="thead-light">
+                <tr>
+                    <th scope="col">Language</th>
+                    <th scope="col">Level</th>
+                    <th scope="col">Degree</th>
+                    <th scope="col">Grade</th>
+                    <th scope="col">Aquisition Date</th>
+                    <th scope="col">Photo</th>
+                </tr>  
+            </thead>  
+
+            <tbody>
+                {% for form in foreign_language_info %}
+                <tr>
+                    <td scope="row">{{form.language}}</td>
+                    <td scope="row">{{form.level}}</td>
+                    <td scope="row">{{form.degree}}</td>
+                    <td scope="row">{{form.grade}}</td>
+                    <td scope="row">{{form.aquisition_date}}</td>
+                    <td scope="row">
+                        <img src= "{{form.photo.url}}" width='35px'>
+                    </td> 
+                </tr>
+                {% endfor %}
+            </tbody>        
+        </table>
+    </div>
+
+    </br>
+
+    <div>
+        <h5>Work Experience</h5>
+        <table class="table table-hover table-bordered">
+            <thead class="thead-light">
+                <tr>
+                    <th scope="col">Start Date</th>
+                    <th scope="col">End Date</th>
+                    <th scope="col">Company</th>
+                    <th scope="col">Postion</th>
+                </tr>  
+            </thead>  
+
+            <tbody>
+                {% for form in work_experience_info %}
+                <tr>
+                    <td scope="row">{{form.start_date}}</td>
+                    <td scope="row">{{form.end_date}}</td>
+                    <td scope="row">{{form.company}}</td>
+                    <td scope="row">{{form.position}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>        
+        </table>
+    </div>
+
+    </br>
+
+    <div>
+        <h5>Reference Letter</h5>
+        <table class="table table-hover table-bordered">
+            <thead class="thead-light">
+                <tr>
+                    <th scope="col">Full Name</th>
+                    <th scope="col">Position</th>
+                    <th scope="col">Organization</th>
+                    <th scope="col">Email</th>
+                </tr>  
+            </thead>  
+
+            <tbody>
+                {% for form in reference_letter_info %}
+                <tr>
+                    <td scope="row">{{form.full_name}}</td>
+                    <td scope="row">{{form.position}}</td>
+                    <td scope="row">{{form.organization}}</td>
+                    <td scope="row">{{form.email}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>        
+        </table>
+    </div>
+
+    </br>
+
+    <div>
+        <h5>Scholarship</h5>
+        <table class="table table-hover table-bordered">
+            <thead class="thead-light">
+                <tr>
+                    <th scope="col">Description</th>
+                    <th scope="col">Aquisition Date</th>
+                    <th scope="col">Educational Institute</th>
+                </tr>  
+            </thead>  
+
+            <tbody>
+                {% for form in scholarship_info %}
+                <tr>
+                    <td scope="row">{{form.description}}</td>
+                    <td scope="row">{{form.aquisition_date}}</td>
+                    <td scope="row">{{form.educational_institution}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>        
+        </table>
+    </div>
+
+    </br>
+
+    <div>
+        <h5>Theses</h5>
+        <table class="table table-hover table-bordered">
+            <thead class="thead-light">
+                <tr>
+                    <th scope="col">Title</th>
+                    <th scope="col">Supervisor</th>
+                    <th scope="col">Grade</th>
+                </tr>  
+            </thead>  
+
+            <tbody>
+                {% for form in theses_info %}
+                <tr>
+                    <td scope="row">{{form.title}}</td>
+                    <td scope="row">{{form.supervisor}}</td>
+                    <td scope="row">{{form.grade}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>        
+        </table>
+    </div>
+    </br>
+</div> 
+
+
+
+
+<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" data-whatever="@mdo">Open modal for @mdo</button>
+<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" data-whatever="@fat">Open modal for @fat</button>
+<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" data-whatever="@getbootstrap">Open modal for @getbootstrap</button>
+
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">New message</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="form-group">
+            <label for="recipient-name" class="col-form-label">Recipient:</label>
+            <input type="text" class="form-control" id="recipient-name">
+          </div>
+          <div class="form-group">
+            <label for="message-text" class="col-form-label">Message:</label>
+            <textarea class="form-control" id="message-text"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Send message</button>
+      </div>
+    </div>
+  </div>
 </div>
+
+<script>
+
+    document.querySelector("img").addEventListener("click", function(e){
+        if (e.taget.width===300){
+            e.target.height='35';
+            e.target.width='35';
+        }else{
+            e.target.height='300';
+            e.target.width='300';
+        }    
+    });
+
+    
+
+    img.half
+    {
+    transform: scale(5);
+    }
+    
+    modal = document.querySelector(".modal-body")
+    let img = document.createElement('img');
+    img.src = 'media/languages/1'
+    modal.appendChild(img);
+
+
+
+    $('#exampleModal').on('show.bs.modal', function (event) {
+    var button = $(event.relatedTarget) // Button that triggered the modal
+    var recipient = button.data('whatever') // Extract info from data-* attributes
+    console.log(recipient)
+    // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+    // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+    var modal = $(this)
+    modal.find('.modal-title').text('New message to ' + recipient)
+    modal.find('.modal-body input').val(recipient)
+    })
+
+</script>
+
 {% endblock %}
+
+
+

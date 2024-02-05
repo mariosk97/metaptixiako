@@ -2,7 +2,7 @@
 {% block content %}
 {% load crispy_forms_tags %}
 <div class="container"> <!--class used for bootstrap-->
-    <form id="form-container" method="POST" action=""> 
+    <form id="form-container" method="POST" action="" enctype="multipart/form-data"> 
         {% csrf_token %}
         {{undergraduate_formset.management_form}}
         {% for form in undergraduate_formset %}

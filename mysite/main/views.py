@@ -5,6 +5,8 @@ from .models import Application, User, Contact_information, Undergraduate, Postg
 from .forms import (UserRegisterForm, UserApplicationForm, ContactInformationForm, MasterForm, OrientationForm,
                     UndergraduateFormSet, PostgraduateFormSet, ForeignLanguageFormSet, WorkExperienceFormSet, ReferenceLetterFormSet, ScholarshipFormSet, ThesesFormSet)
 from django.contrib.auth import authenticate, login, logout
+from django.core.mail import send_mail
+from mysite.settings import EMAIL_HOST_USER
 
 # Create your views here.
 
@@ -186,10 +188,13 @@ def accept_application(request, pk):
         return redirect('home')
     
     application = Application.objects.get(id=pk)
+    user = User.objects.get(application = application)
     
     if request.method == 'POST':
         application.is_accepted = True
         application.save()
+
+        send_acceptance_email(user.email)
         return redirect('all_applications')
 
     context = {'application': application}    
@@ -271,7 +276,7 @@ def undergraduate(request):
     undergraduate_formset = UndergraduateFormSet(queryset=Undergraduate.objects.none(), prefix = 'undergraduate')
 
     if request.method == 'POST':
-        undergraduate_formset = UndergraduateFormSet(request.POST, prefix = 'undergraduate')
+        undergraduate_formset = UndergraduateFormSet(request.POST, request.FILES, prefix = 'undergraduate')
         if undergraduate_formset.is_valid():
             for form in undergraduate_formset:
                 if form.has_changed():#ignore empty forms
@@ -298,7 +303,7 @@ def postgraduate(request):
     postgraduate_formset = PostgraduateFormSet(queryset=Postgraduate.objects.none(), prefix = 'postgraduate')
 
     if request.method == 'POST':
-        postgraduate_formset = PostgraduateFormSet(request.POST, prefix = 'postgraduate')
+        postgraduate_formset = PostgraduateFormSet(request.POST, request.FILES, prefix = 'postgraduate')
         if postgraduate_formset.is_valid():
             for form in postgraduate_formset:
                 if form.has_changed():#ignore empty forms
@@ -330,7 +335,7 @@ def foreign_language(request):
                                                                    'level_data_list': ('A1', 'A2', 'B1', 'B2', 'C1', 'C2')}) #suggestions for level field
     
     if request.method == 'POST':
-        foreign_language_formset = ForeignLanguageFormSet(request.POST, prefix = 'foreign_language')
+        foreign_language_formset = ForeignLanguageFormSet(request.POST, request.FILES, prefix = 'foreign_language')
         if foreign_language_formset.is_valid():
             for form in foreign_language_formset:
                 if form.has_changed():#ignore empty forms
@@ -502,7 +507,7 @@ def update_contact_information(request):
         if contact_info_form.is_valid():
             contact_info_form.save()
         
-        return redirect('update_undergraduate')
+            return redirect('update_undergraduate')
 
     context = {
         'contact_info_form': contact_info_form
@@ -520,7 +525,7 @@ def update_undergraduate(request):
     undergraduate_formset = UndergraduateFormSet(instance = user, prefix = 'undergraduate')
     
     if request.method == 'POST':
-        undergraduate_formset = UndergraduateFormSet(request.POST, instance = user, prefix = 'undergraduate')
+        undergraduate_formset = UndergraduateFormSet(request.POST, request.FILES, instance = user, prefix = 'undergraduate')
 
         if undergraduate_formset.is_valid():
             for form in undergraduate_formset:
@@ -533,7 +538,7 @@ def update_undergraduate(request):
             for form in undergraduate_info_to_be_deleted:
                 form.delete()
         
-        return redirect('update_postgraduate')
+            return redirect('update_postgraduate')
     
     context = {
         'undergraduate_formset': undergraduate_formset
@@ -551,7 +556,7 @@ def update_postgraduate(request):
     postgraduate_formset = PostgraduateFormSet(instance = user, prefix = 'postgraduate')
     
     if request.method == 'POST':
-        postgraduate_formset = PostgraduateFormSet(request.POST, instance = user, prefix = 'postgraduate')
+        postgraduate_formset = PostgraduateFormSet(request.POST, request.FILES, instance = user, prefix = 'postgraduate')
 
         if postgraduate_formset.is_valid():
             for form in postgraduate_formset:
@@ -564,7 +569,7 @@ def update_postgraduate(request):
             for form in postgraduate_info_to_be_deleted:
                 form.delete()
         
-        return redirect('update_foreign_language')
+            return redirect('update_foreign_language')
     
     context = {
         'postgraduate_formset': postgraduate_formset
@@ -584,7 +589,7 @@ def update_foreign_language(request):
                                                                    'level_data_list': ('A1', 'A2', 'B1', 'B2', 'C1', 'C2')}) #suggestions for level field)
     
     if request.method == 'POST':
-        foreign_language_formset = ForeignLanguageFormSet(request.POST, instance = user, prefix = 'foreign_language')
+        foreign_language_formset = ForeignLanguageFormSet(request.POST, request.FILES, instance = user, prefix = 'foreign_language')
 
         if foreign_language_formset.is_valid():
             for form in foreign_language_formset:
@@ -597,7 +602,7 @@ def update_foreign_language(request):
             for form in foreign_language_info_to_be_deleted:
                 form.delete()
         
-        return redirect('update_work_experience')
+            return redirect('update_work_experience')
     
     context = {
         'foreign_language_formset': foreign_language_formset
@@ -628,7 +633,7 @@ def update_work_experience(request):
             for form in work_experience_info_to_be_deleted:
                 form.delete()
         
-        return redirect('update_reference_letter')
+            return redirect('update_reference_letter')
     
     context = {
         'work_experience_formset': work_experience_formset
@@ -659,7 +664,7 @@ def update_reference_letter(request):
             for form in reference_letter_info_to_be_deleted:
                 form.delete()
         
-        return redirect('update_scholarship')
+            return redirect('update_scholarship')
 
     context = {
         'reference_letter_formset': reference_letter_formset
@@ -690,7 +695,7 @@ def update_scholarship(request):
             for form in scholarship_info_to_be_deleted:
                 form.delete()
         
-        return redirect('update_theses')
+            return redirect('update_theses')
     
     context = {
         'scholarship_formset': scholarship_formset
@@ -721,7 +726,7 @@ def update_theses(request):
             for form in theses_info_to_be_deleted:
                 form.delete()
         
-        return redirect('my_profile')  
+            return redirect('my_profile')  
 
     context = {
         'theses_formset': theses_formset
@@ -730,7 +735,6 @@ def update_theses(request):
     return render(request, "main/theses.html", context)             
 
 
-login_required(login_url='login') 
 def choose_master(request):
     if request.user.groups.filter(name='Grammateia').exists():
         return redirect('home')
@@ -819,7 +823,13 @@ def update_master(request, pk): #change an application that has already been cre
 
     return render(request, "main/choose_master.html", context)
 
-
+def send_acceptance_email(email): #not a view
+    subject = 'You have been accepted to your chosen Master program!'
+    message = 'Congratulations!'
+    from_email = EMAIL_HOST_USER
+    recipient_list = [email]
+    send_mail(subject, message, EMAIL_HOST_USER, recipient_list)
+    
 
 
 

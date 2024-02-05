@@ -116,6 +116,7 @@ class Foreign_language(models.Model):
     degree = models.CharField(max_length=150, null=True, blank=True)
     grade = models.FloatField(null=True, blank=True)
     acquisition_date = models.DateField(null=True, blank=True)
+    photo = models.ImageField(upload_to="languages", null=True)
     is_deleted = models.BooleanField(default = False) #true when the user wants to remove the form
 
     def __str__(self):
@@ -174,6 +175,7 @@ class Studies(models.Model):
     department = models.CharField(max_length=150, null=True, blank = True) #required field. Code in clean function in StudyForm. Can't remove blank=true because of is_deleted
     degree_title = models.CharField(max_length=150, null=True, blank = True)
     grade = models.FloatField(null=True, blank = True)
+    photo = models.ImageField(upload_to="studies", null=True)
     is_deleted = models.BooleanField(default = False) #true when the user wants to remove the form
 
     class Meta:
