@@ -132,11 +132,18 @@
                     <td scope="row">{{form.department}}</td>
                     <td scope="row">{{form.degree_title}}</td>
                     <td scope="row">{{form.grade}}</td>
-                    <td scope="row">
-                        <img src= "{{form.photo.url}}" width='35px'>
+                    <td scope="row"><td scope="row"><img src= "{{form.photo.url}}" width='50px' id="image-url-{{ form.id }}"> <!--modal img src is added by using this image-url-id-->
+                        
+                        <!-- Button trigger modal -->
+                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#photoModal" id="{{ form.id }}" onclick="updateModal(this.id)">
+                            Show Image
+                        </button>
+
+                        
                     </td> 
                 </tr>
                 {% endfor %}
+                
             </tbody>  
         </table>
     </div>
@@ -163,8 +170,13 @@
                     <td scope="row">{{form.department}}</td>
                     <td scope="row">{{form.degree_title}}</td>
                     <td scope="row">{{form.grade}}</td>
-                    <td scope="row">
-                        <img src= "{{form.photo.url}}" width='35px'>
+                    <td scope="row"><td scope="row"><img src= "{{form.photo.url}}" width='50px' id="image-url-{{ form.id }}"> <!--modal img src is added by using this image-url-id-->
+                        
+                        <!-- Button trigger modal -->
+                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#photoModal" id="{{ form.id }}" onclick="updateModal(this.id)">
+                            Show Image
+                        </button>
+   
                     </td> 
                 </tr>
                 {% endfor %}
@@ -196,8 +208,12 @@
                     <td scope="row">{{form.degree}}</td>
                     <td scope="row">{{form.grade}}</td>
                     <td scope="row">{{form.aquisition_date}}</td>
-                    <td scope="row">
-                        <img src= "{{form.photo.url}}" width='35px'>
+                    <td scope="row"><img src= "{{form.photo.url}}" width='50px' id="image-url-{{ form.id }}"> <!--modal img src is added by using this image-url-id-->
+                        
+                        <!-- Button trigger modal -->
+                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#photoModal" id="{{ form.id }}" onclick="updateModal(this.id)">
+                            Show Image
+                        </button>
                     </td> 
                 </tr>
                 {% endfor %}
@@ -311,78 +327,34 @@
     </br>
 </div> 
 
-
-
-
-<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" data-whatever="@mdo">Open modal for @mdo</button>
-<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" data-whatever="@fat">Open modal for @fat</button>
-<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" data-whatever="@getbootstrap">Open modal for @getbootstrap</button>
-
-<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">New message</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <form>
-          <div class="form-group">
-            <label for="recipient-name" class="col-form-label">Recipient:</label>
-            <input type="text" class="form-control" id="recipient-name">
-          </div>
-          <div class="form-group">
-            <label for="message-text" class="col-form-label">Message:</label>
-            <textarea class="form-control" id="message-text"></textarea>
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Send message</button>
-      </div>
+<!-- Modal -->
+<div class="modal fade" id="photoModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+            
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+            </div>
+            <div class="modal-body">
+                <img src= "..." class="img-fluid" alt="Responsive image" id="modal-image"> <!-- source is dynamically added by updateModal function-->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
+
 
 <script>
 
-    document.querySelector("img").addEventListener("click", function(e){
-        if (e.taget.width===300){
-            e.target.height='35';
-            e.target.width='35';
-        }else{
-            e.target.height='300';
-            e.target.width='300';
-        }    
-    });
-
-    
-
-    img.half
-    {
-    transform: scale(5);
-    }
-    
-    modal = document.querySelector(".modal-body")
-    let img = document.createElement('img');
-    img.src = 'media/languages/1'
-    modal.appendChild(img);
-
-
-
-    $('#exampleModal').on('show.bs.modal', function (event) {
-    var button = $(event.relatedTarget) // Button that triggered the modal
-    var recipient = button.data('whatever') // Extract info from data-* attributes
-    console.log(recipient)
-    // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
-    // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
-    var modal = $(this)
-    modal.find('.modal-title').text('New message to ' + recipient)
-    modal.find('.modal-body input').val(recipient)
-    })
+function updateModal(id){
+          
+    let image_src = document.getElementById("image-url-" + id).src;
+    document.getElementById("modal-image").src = image_src;
+}          
 
 </script>
 
