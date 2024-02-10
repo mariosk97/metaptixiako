@@ -10,19 +10,27 @@
 
     {% if request.user.is_authenticated  %}  
     {% if not perms.main.view_application %}
-    {% if not request.user.has_applied %}
-    <a class="nav-item nav-link" href="{% url 'create_application' %}">
+    <a class="nav-item nav-link" href="{% url 'choose_master' %}">
         Create Application
     </a>
-    {% else %}
-    <a class="nav-item nav-link" href="{% url 'my_application' %}">
-        My Application
+    {% if request.user.has_applied %}
+    <a class="nav-item nav-link" href="{% url 'my_applications' %}">
+        My Applications
     </a>
     {% endif %}
     {% endif %}
     {% endif %}
 
     {% if request.user.is_authenticated %}
+    <div class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Profile
+        </a>
+        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <a class="dropdown-item" href="{% url 'my_profile' %}">My profile</a>
+            <a class="dropdown-item" href = "{% url 'user_information' %}">Set Up Profile</a>
+        </div>
+    </div>
     <a class="nav-item nav-link" href="{% url 'logout' %}"> 
         Logout
     </a>

@@ -41,7 +41,7 @@ class User(AbstractUser):
         blank=True
     )
     
-    date_of_birth = models.DateField(null=True) # user should be able to choose. Maybe try date input widget
+    date_of_birth = models.DateField(null=True) 
     place_of_birth = models.CharField(max_length=150, null=True)
     prefecture = models.CharField(max_length=150, null=True) #νομός
     country = models.CharField(max_length=150, null=True)
@@ -58,18 +58,31 @@ class User(AbstractUser):
 
     afm = models.CharField(max_length=9, validators=[validate_afm], null = True)     
    
+
+class Master(models.Model):
+    name = models.CharField(max_length=150, null=True)
+      
+    def __str__(self):
+        return str(self.name) 
     
-    #doy
-    #id_number = models.CharField(max_length=150, null=True)
+
+class Orientation(models.Model):
+    name = models.CharField(max_length=150, null=True)
+    master = models.ForeignKey(Master,on_delete=models.CASCADE, null=True)
+
+    def __str__(self):
+        return str(self.name)
+
 
 class Application(models.Model):
-    #readonly_fields = ["created"] #to show created time in admin. Does not work.
-    
-    user = models.OneToOneField(User,on_delete=models.CASCADE, null=True) #change null=True
+    user = models.ForeignKey(User,on_delete=models.CASCADE, null=True) #change null=True
+    master = models.ForeignKey(Master,on_delete=models.CASCADE, null=True)
+    orientation = models.ForeignKey(Orientation,on_delete=models.CASCADE, null=True)
     updated = models.DateTimeField(auto_now=True)
-    created = models.DateTimeField(auto_now_add=True) #time created should be when has_applied=True
+    created = models.DateTimeField(auto_now_add=True) 
     is_validated = models.BooleanField(default=False)
     is_accepted = models.BooleanField(default=False)
+    is_withdrawn = models.BooleanField(default=False)
     
     class Meta:
         ordering = ['-updated', '-created']
@@ -78,9 +91,8 @@ class Application(models.Model):
             ("accept_application", "Can accept an application")
         ]
 
-
     def __str__(self):
-        return str(self.user) #maybe change to something else later, this is what is shown in admin
+        return str(self.user) #this is shown in admin       
     
 
 class Contact_information(models.Model):   
@@ -104,6 +116,7 @@ class Foreign_language(models.Model):
     degree = models.CharField(max_length=150, null=True, blank=True)
     grade = models.FloatField(null=True, blank=True)
     acquisition_date = models.DateField(null=True, blank=True)
+    photo = models.ImageField(upload_to="languages", null=True, blank=True)
     is_deleted = models.BooleanField(default = False) #true when the user wants to remove the form
 
     def __str__(self):
@@ -162,6 +175,7 @@ class Studies(models.Model):
     department = models.CharField(max_length=150, null=True, blank = True) #required field. Code in clean function in StudyForm. Can't remove blank=true because of is_deleted
     degree_title = models.CharField(max_length=150, null=True, blank = True)
     grade = models.FloatField(null=True, blank = True)
+    photo = models.ImageField(upload_to="studies", null=True, blank = True)
     is_deleted = models.BooleanField(default = False) #true when the user wants to remove the form
 
     class Meta:

@@ -1,0 +1,34 @@
+{% extends 'main/base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+{% load crispy_forms_tags %}
+<div class="container"> <!--class used for bootstrap-->
+    <form id="form-container" method="POST" action="" enctype="multipart/form-data"> 
+        {% csrf_token %}
+        {{undergraduate_formset.management_form}}
+        {% for form in undergraduate_formset %}
+        {% if form.is_deleted.value %}
+        <div class="undergraduate-form entire-form" style="display: none;"> <!-- used in case user has deleted the form and page refreshes because of validations errors -->
+            {{form|crispy}}
+        </div>
+        {% else %}
+        <div class="undergraduate-form entire-form">
+            {{form|crispy}}
+        </div>
+        {% endif %}
+        {% endfor %}
+
+        
+        <button id="add_undergraduate_form" type="button" class="btn btn-secondary">Add Undergraduate</button>
+
+        <input type="submit" value="Next" class="btn btn-primary"/>
+    </form>
+</div>        
+
+<script src="{% static 'undergraduate.js' %}"></script>
+<script src="{% static 'forms.js' %}"></script>
+ 
+{% endblock %} 

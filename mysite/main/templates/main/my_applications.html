@@ -1,35 +1,35 @@
 {% extends 'main/base.html' %}
 
 {% block content %}
-<div class="home-container container">
+<div class="container">
     
+    {% if not has_contact_info %}
+    <div class="alert alert-warning mt-2" role="alert">
+        Make sure you set up your profile.<a href = "{% url 'user_information' %}"> Click here.</a>   
+    </div>
+    {% endif %}
+
     <div>
         <div class="table-responsive mt-4">
             <table class="table table-hover table-bordered">
                 <thead class="thead-light">
-                    <tr>    
-                        <th scope="col">User</th>
+                    <tr>
                         <th scope="col">Master</th>
                         <th scope="col">Orientation</th>
                         <th scope="col">Creation Date</th>
                         <th scope="col"> Status</th>
-                        <!-- <th scope="col">Last Name</th> -->
                         <th scope="col">Actions</th>
                     </tr>
                 </thead>
-                
+
                 <tbody>
                     {% for application in applications %}
                     <tr>
-                        
-                        <td>{{application.user}}</td>
                         <td scope="row">{{application.master}}</td>
                         <td scope="row">{{application.orientation}}</td>
                         <td scope="row">{{application.created}}</td>
                         <td scope="row">
-                            {% if application.is_withdrawn %}
-                            Withdrawn
-                            {% elif application.is_accepted %}
+                            {% if application.is_accepted %}
                             Accepted
                             {% elif application.is_validated %}
                             Validated
@@ -37,20 +37,16 @@
                             Pending validation
                             {% endif %}
                         </td>
-                        <td>
-                            <a href="/applications/{{application.id}}">View</a> 
+                        <td scope="row"> 
                             {% if not application.is_validated %}
-                            <a href = "{% url 'validate_application' application.id %}">Validate</a></td>
-                            {% elif not application.is_accepted %}
-                            <a href = "{% url 'accept_application' application.id %}">Accept</a>
-                        </td>
-                        {% endif %}
+                            <a href = "{% url 'update_master' application.id %}">Edit</a>
+                            {% endif %}
+                            <a href = "{% url 'delete_application' application.id %}">Delete</a></td>
                     </tr>
                     {% endfor %}
                 </tbody>
-            </table>
+            </table>            
         </div>
-    </div>
+    </div>    
 </div>
-    
 {% endblock %}

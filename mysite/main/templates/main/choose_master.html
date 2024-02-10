@@ -1,0 +1,14 @@
+{% extends 'main/base.html' %}
+{% block content %}
+{% load crispy_forms_tags %}
+<div class="container"> <!--class used for bootstrap-->
+    <p> Choose Master</p>
+    <form id="form-container" method="POST" action=""> 
+        {% csrf_token %}
+        {{master_form|crispy}}
+
+        <input type="submit" value="Next" class="btn btn-primary"/>
+    </form>
+</div>        
+
+{% endblock %} 

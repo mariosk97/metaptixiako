@@ -1,9 +1,11 @@
 from django.forms import ModelForm
 from django.forms import modelformset_factory, inlineformset_factory
 from django import forms
-from .models import Application, User, Contact_information, Undergraduate, Postgraduate, Studies, Foreign_language, Work_experience, Reference_letter, Scholarship, Theses
+from .models import Application, User, Contact_information, Undergraduate, Postgraduate, Studies, Foreign_language, Work_experience, Reference_letter, Scholarship, Theses, Master, Orientation
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
+
+from .fields import ListTextWidget
 
 class ApplicationForm (ModelForm): #currently not used. Done with UserApplicationForm. Delete
     class Meta:
@@ -51,7 +53,8 @@ class StudyForm(ModelForm):
             "is_deleted": "Delete",
             "univercity": "Univercity*",
             "department": "Department*",
-            "degree_title": "Degree Title*"
+            "degree_title": "Degree Title",
+            "photo": "Photo*"
         }
 
     def __init__(self, *args, **kwargs):
@@ -64,13 +67,14 @@ class StudyForm(ModelForm):
         grade = self.cleaned_data.get("grade")
         univercity = self.cleaned_data.get("univercity")
         department = self.cleaned_data.get("department")
+        photo = self.cleaned_data.get("photo")
         is_deleted = self.cleaned_data.get("is_deleted")
 
         if not is_deleted: #if user has deleted the form no validation is required
-            if degree_title is not None or grade is not None or univercity is not None or department is not None: #if user has filled at least one of the fields
-                if univercity is None or department is None: #if univercity or department have not been filled
+            if degree_title is not None or grade is not None or univercity is not None or department is not None or photo is not None: #if user has filled at least one of the fields
+                if univercity is None or department is None or photo is None: #if univercity or department or photo have not been filled
                     raise ValidationError(
-                        "Univercity and department are required."
+                        "Univercity, department and photo are required."
                     )   
                 
 
@@ -85,7 +89,7 @@ PostgraduateFormSet = inlineformset_factory(
 
 
 class ForeignLanguageForm(ModelForm): 
-    acquisition_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    acquisition_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}), required=False)
     
     class Meta:
         model = Foreign_language
@@ -94,12 +98,20 @@ class ForeignLanguageForm(ModelForm):
             "is_deleted": "Delete",
             "language": "Language*",
             "degree": "Degree*",
-            "acquisition_date": "Acquisition Date*"
+            "acquisition_date": "Acquisition Date*",
+            "photo": "Photo*"
         }
 
     def __init__(self, *args, **kwargs):
+        _language_list = kwargs.pop('language_data_list', None) #now the form needs a parameter when a new instance is created in views.py
+        _level_list = kwargs.pop('level_data_list', None)
         super().__init__(*args, **kwargs)
         self.fields["is_deleted"].widget.attrs.update({"class": "deleteCheckbox"}) 
+        
+        self.fields['language'].widget = ListTextWidget(data_list=_language_list, name='language-list') 
+        self.fields['level'].widget = ListTextWidget(data_list=_level_list, name='level-list') 
+        
+        self.fields['acquisition_date'].label = "Acquisition Date*"
 
     #used to validate a form only if it has not been deleted. Otherwise a half-filled form that was later deleted might raise errors, which shouldn't happen
     def clean(self):
@@ -107,14 +119,15 @@ class ForeignLanguageForm(ModelForm):
         level = self.cleaned_data.get("level")  
         degree = self.cleaned_data.get("degree")  
         grade = self.cleaned_data.get("grade")  
-        acquisition_date = self.cleaned_data.get("acquisition_date") 
+        acquisition_date = self.cleaned_data.get("acquisition_date")
+        photo = self.cleaned_data.get("photo") 
         is_deleted = self.cleaned_data.get("is_deleted")  
 
         if not is_deleted: #if user has deleted the form no validation is required
-            if language is not None or level is not None or degree is not None or grade is not None or acquisition_date is not None: #if user has filled at least one of the fields
-                if language is None or degree is None or acquisition_date is None: #if language, degree or acquisition_date have not been filled
+            if language is not None or level is not None or degree is not None or grade is not None or acquisition_date is not None or photo is not None: #if user has filled at least one of the fields
+                if language is None or degree is None or acquisition_date is None or photo is None: #if language, degree, acquisition_date or photo have not been filled
                     raise ValidationError(
-                        "Language, degree and acquisition date are required."
+                        "Language, degree, acquisition date and photo are required."
                     )          
 
 
@@ -124,8 +137,8 @@ ForeignLanguageFormSet = inlineformset_factory(
 
 
 class WorkExperienceForm(ModelForm): 
-    start_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
-    end_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    start_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}), required=False)
+    end_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}), required=False)
     
     class Meta:
         model = Work_experience
@@ -140,6 +153,7 @@ class WorkExperienceForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["is_deleted"].widget.attrs.update({"class": "deleteCheckbox"}) 
+        self.fields['start_date'].label = "Start Date*"
 
     #used to validate a form only if it has not been deleted. Otherwise a half-filled form that was later deleted might raise errors, which shouldn't happen
     def clean(self):
@@ -201,7 +215,7 @@ ReferenceLetterFormSet = inlineformset_factory(
 
 
 class ScholarshipForm(ModelForm): 
-    acquisition_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    acquisition_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}), required=False)
     
     class Meta:
         model = Scholarship
@@ -270,3 +284,31 @@ ThesesFormSet = inlineformset_factory(
 )
 
 
+class MasterForm(ModelForm): 
+    name = forms.ModelChoiceField(queryset = Master.objects.all(), label="Master")
+
+    class Meta:
+        model = Master
+        exclude = ['user'] #automatically assigned from create application view
+
+
+class OrientationForm(ModelForm): 
+    name = forms.ModelChoiceField(queryset=None, label="Orientation")
+
+    class Meta:
+        model = Master
+        exclude = ['user'] #automatically assigned from create application view   
+
+    def __init__(self, master, *args, **kwargs):
+        super(OrientationForm, self).__init__(*args, **kwargs)
+        self.fields['name'].queryset = Orientation.objects.filter(master=master) #master is added as an argument in choose_orientation view    
+
+    
+
+
+
+
+         
+           
+
+       

@@ -1,0 +1,34 @@
+{% extends 'main/base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+{% load crispy_forms_tags %}
+<div class="container"> <!--class used for bootstrap-->
+    <form id="form-container" method="POST" action="" enctype="multipart/form-data"> 
+        {% csrf_token %}
+        {{foreign_language_formset.management_form}}
+        {% for form in foreign_language_formset %}
+        {% if form.is_deleted.value %}
+        <div class="foreign_language-form entire-form" style="display: none;"> <!-- used in case user has deleted the form and page refreshes because of validations errors -->
+            {{form|crispy}}
+        </div>
+        {% else %}
+        <div class="foreign_language-form entire-form">
+            {{form|crispy}}
+        </div>
+        {% endif %}
+        {% endfor %}
+        
+        <button id="add_foreign_language_form" type="button" class="btn btn-secondary">Add Foreign Language</button>
+
+        <input type="submit" value="Next" class="btn btn-primary"/>
+    </form>
+</div>        
+
+<script src="{% static 'foreignLanguage.js' %}"></script>
+<script src="{% static 'forms.js' %}"></script>
+
+
+{% endblock %} 

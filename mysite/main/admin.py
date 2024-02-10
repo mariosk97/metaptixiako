@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Application, User, Contact_information, Foreign_language, Work_experience, Reference_letter, Theses, Scholarship, Undergraduate, Postgraduate
+from .models import Application, User, Contact_information, Foreign_language, Work_experience, Reference_letter, Theses, Scholarship, Undergraduate, Postgraduate, Master, Orientation
 
 # Register your models here.
 
@@ -14,5 +14,7 @@ admin.site.register(Theses)
 admin.site.register(Scholarship)
 admin.site.register(Undergraduate)
 admin.site.register(Postgraduate)
+admin.site.register(Master)
+admin.site.register(Orientation)
 
 
