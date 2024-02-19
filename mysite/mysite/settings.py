@@ -146,8 +146,16 @@ STATIC_URL = "static/"
 
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.office365.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
+
+#settings to send email
+#EMAIL_HOST = 'smtp.office365.com'
+#EMAIL_PORT = 587
+#EMAIL_USE_TLS = True
+
+#settings for mailhog (testing)
+EMAIL_HOST = '127.0.0.1'
+EMAIL_PORT = 1025
+EMAIL_USE_TLS = False
+
 EMAIL_HOST_USER = 'grammateia1235@hotmail.com'
 EMAIL_HOST_PASSWORD = '123pass!@#$'
