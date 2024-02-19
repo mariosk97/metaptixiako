@@ -151,7 +151,7 @@
                     <th scope="col">Level</th>
                     <th scope="col">Degree</th>
                     <th scope="col">Grade</th>
-                    <th scope="col">Aquisition Date</th>
+                    <th scope="col">Acquisition Date</th>
                     <th scope="col">Photo</th>
                 </tr>  
             </thead>  
@@ -163,7 +163,7 @@
                     <td scope="row">{{form.level}}</td>
                     <td scope="row">{{form.degree}}</td>
                     <td scope="row">{{form.grade}}</td>
-                    <td scope="row">{{form.aquisition_date}}</td>
+                    <td scope="row">{{form.acquisition_date}}</td>
                     <td scope="row"><img src= "{{form.photo.url}}" width='50px' id="image-url-{{ form.id }}"> <!--modal img src is added by using this image-url-id-->
                         
                         <!-- Button trigger modal -->
@@ -239,7 +239,7 @@
             <thead class="thead-light">
                 <tr>
                     <th scope="col">Description</th>
-                    <th scope="col">Aquisition Date</th>
+                    <th scope="col">Acquisition Date</th>
                     <th scope="col">Educational Institute</th>
                 </tr>  
             </thead>  
@@ -248,7 +248,7 @@
                 {% for form in scholarship_info %}
                 <tr>
                     <td scope="row">{{form.description}}</td>
-                    <td scope="row">{{form.aquisition_date}}</td>
+                    <td scope="row">{{form.acquisition_date}}</td>
                     <td scope="row">{{form.educational_institution}}</td>
                 </tr>
                 {% endfor %}
